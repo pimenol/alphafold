@@ -25,7 +25,7 @@ import numpy as np
 # Silence TF warnings before importing AF2
 os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')
 
-from alphafold.common import confidence
+from alphafold.common import confidence, residue_constants
 from alphafold.data import parsers, pipeline
 from alphafold.model import config as af_config
 from alphafold.model import data as af_data
@@ -61,6 +61,26 @@ def load_features_from_a3m(
         pipeline.make_sequence_features(sequence, protein_id, num_res)
     )
     raw_features.update(pipeline.make_msa_features([msa]))
+
+    # Add empty template features (needed for template-using models like
+    # model_1_ptm / model_2_ptm).  Matches the pattern in templates.py.
+    raw_features['template_aatype'] = np.zeros(
+        (1, num_res, len(residue_constants.restypes_with_x_and_gap)),
+        np.float32,
+    )
+    raw_features['template_all_atom_masks'] = np.zeros(
+        (1, num_res, residue_constants.atom_type_num), np.float32,
+    )
+    raw_features['template_all_atom_positions'] = np.zeros(
+        (1, num_res, residue_constants.atom_type_num, 3), np.float32,
+    )
+    raw_features['template_domain_names'] = np.array(
+        [''.encode()], dtype=object,
+    )
+    raw_features['template_sequence'] = np.array(
+        [''.encode()], dtype=object,
+    )
+    raw_features['template_sum_probs'] = np.array([0], dtype=np.float32)
 
     processed = af_features.np_example_to_features(
         np_example=raw_features,
