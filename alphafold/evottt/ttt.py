@@ -270,9 +270,19 @@ def run_ttt(
         # Re-add ensemble dim expected by AlphaFold
         masked_batch_e = jax.tree.map(lambda x: x[None], masked_batch)
 
-        loss, grads = jax.value_and_grad(ttt_loss_fn)(
-            trainable, base_params, lora_meta, alpha, rank,
-            apply_fn, masked_batch_e, fwd_rng,
+        # jax.checkpoint avoids storing all intermediate activations
+        # (48 Evoformer blocks) — recomputes them during backward instead.
+        # Capture non-traceable values (apply_fn, lora_meta, alpha, rank)
+        # as closures so JAX only traces trainable, batch, rng.
+        @jax.checkpoint
+        def _loss(trainable, batch, rng):
+            return ttt_loss_fn(
+                trainable, base_params, lora_meta, alpha, rank,
+                apply_fn, batch, rng,
+            )
+
+        loss, grads = jax.value_and_grad(_loss)(
+            trainable, masked_batch_e, fwd_rng,
         )
         updates, new_opt_state = optimizer.update(grads, opt_state, trainable)
         new_trainable = optax.apply_updates(trainable, updates)
