@@ -1,0 +1,93 @@
+#!/bin/bash
+#SBATCH --job-name=evottt
+#SBATCH --account=OPEN-35-8
+#SBATCH --partition=qgpu
+#SBATCH --nodes=1
+#SBATCH --gpus=1
+#SBATCH --cpus-per-task=8
+#SBATCH --time=48:00:00
+#SBATCH --output=/scratch/project/open-35-8/pimenol1/alphafold/jobs/evottt/evottt_%A.out
+#SBATCH --error=/scratch/project/open-35-8/pimenol1/alphafold/jobs/evottt/evottt_%A.err
+#
+# EvoTTT benchmark: baseline AF2 → TTT adaptation → adapted AF2.
+#
+# Submit from repo root:
+#   sbatch jobs/evottt/run_evottt.sh
+#
+# Optional environment variables (export before sbatch):
+#   TTT_STEPS, TTT_LR, LORA_RANK, LAST_N_BLOCKS, LORA_ALPHA
+#   START_IDX, END_IDX, PROTEIN_IDS
+
+# ---- CUDA ----
+module load CUDA/12.2.2 2>/dev/null || true
+module load cuDNN/8.9.2.26-CUDA-12.2.0 2>/dev/null || true
+if [[ -n "${EBROOTCUDA:-}" ]]; then
+  export XLA_FLAGS="--xla_gpu_cuda_data_dir=${EBROOTCUDA}"
+fi
+
+# ---- Conda ----
+CONDA_ROOT="${CONDA_ROOT:-/scratch/project/open-35-8/pimenol1/miniconda3}"
+source "${CONDA_ROOT}/etc/profile.d/conda.sh"
+conda activate alphafold_evottt
+
+# ---- Repo ----
+REPO_ROOT="/scratch/project/open-35-8/pimenol1/alphafold"
+cd "${REPO_ROOT}" || exit 1
+export PYTHONPATH="${REPO_ROOT}:${PYTHONPATH:-}"
+
+# ---- Memory ----
+export TF_FORCE_UNIFIED_MEMORY=1
+export XLA_PYTHON_CLIENT_MEM_FRACTION=4.0
+
+# ---- Paths ----
+DATA_DIR="${DATA_DIR:-/scratch/project/open-35-8/pimenol1/af2_data}"
+MSA_DIR="${MSA_DIR:-/scratch/project/open-35-8/antonb/bfvd/bfvd_msa}"
+BENCHMARK_CSV="${BENCHMARK_CSV:-/scratch/project/open-35-8/pimenol1/ProteinTTT/ProteinTTT_fresh/data/benchmark/summary.csv}"
+OUTPUT_DIR="${OUTPUT_DIR:-${REPO_ROOT}/evottt_outputs}"
+
+# ---- TTT hyperparameters ----
+TTT_STEPS="${TTT_STEPS:-50}"
+TTT_LR="${TTT_LR:-1e-4}"
+LORA_RANK="${LORA_RANK:-4}"
+LAST_N_BLOCKS="${LAST_N_BLOCKS:-48}"
+LORA_ALPHA="${LORA_ALPHA:-1.0}"
+
+# ---- Subset ----
+START_IDX="${START_IDX:-0}"
+END_IDX="${END_IDX:-}"
+PROTEIN_IDS="${PROTEIN_IDS:-}"
+
+echo "============================================"
+echo "EvoTTT benchmark run"
+echo "Job ID: ${SLURM_JOB_ID}"
+echo "Node: $(hostname)"
+echo "TTT: steps=${TTT_STEPS} lr=${TTT_LR} rank=${LORA_RANK} blocks=${LAST_N_BLOCKS} alpha=${LORA_ALPHA}"
+echo "============================================"
+
+CMD=(
+  python3 scripts/run_evottt_benchmark.py
+  --benchmark_csv "${BENCHMARK_CSV}"
+  --msa_dir "${MSA_DIR}"
+  --data_dir "${DATA_DIR}"
+  --output_dir "${OUTPUT_DIR}"
+  --model_name model_1_ptm
+  --ttt_steps "${TTT_STEPS}"
+  --ttt_lr "${TTT_LR}"
+  --lora_rank "${LORA_RANK}"
+  --last_n_blocks "${LAST_N_BLOCKS}"
+  --lora_alpha "${LORA_ALPHA}"
+  --start_idx "${START_IDX}"
+  --skip_existing
+)
+
+if [[ -n "${END_IDX}" ]]; then
+  CMD+=(--end_idx "${END_IDX}")
+fi
+
+if [[ -n "${PROTEIN_IDS}" ]]; then
+  CMD+=(--protein_ids "${PROTEIN_IDS}")
+fi
+
+"${CMD[@]}" "$@"
+
+echo "Job finished."
