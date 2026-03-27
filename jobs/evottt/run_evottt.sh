@@ -27,8 +27,11 @@ fi
 
 # ---- Conda ----
 CONDA_ROOT="${CONDA_ROOT:-/scratch/project/open-35-8/pimenol1/miniconda3}"
+CONDA_ENV="${CONDA_ROOT}/envs/alphafold_evottt"
 source "${CONDA_ROOT}/etc/profile.d/conda.sh"
-conda activate alphafold_evottt
+conda activate alphafold_evottt 2>/dev/null || true
+# Ensure conda env's bin is first in PATH
+export PATH="${CONDA_ENV}/bin:${PATH}"
 
 # ---- Repo ----
 REPO_ROOT="/scratch/project/open-35-8/pimenol1/alphafold"
@@ -36,6 +39,7 @@ cd "${REPO_ROOT}" || exit 1
 export PYTHONPATH="${REPO_ROOT}:${PYTHONPATH:-}"
 
 # ---- Memory ----
+export PYTHONUNBUFFERED=1
 export TF_FORCE_UNIFIED_MEMORY=1
 export XLA_PYTHON_CLIENT_MEM_FRACTION=4.0
 
@@ -62,10 +66,11 @@ echo "EvoTTT benchmark run"
 echo "Job ID: ${SLURM_JOB_ID}"
 echo "Node: $(hostname)"
 echo "TTT: steps=${TTT_STEPS} lr=${TTT_LR} rank=${LORA_RANK} blocks=${LAST_N_BLOCKS} alpha=${LORA_ALPHA}"
+echo "Python: $(which python3) ($(python3 --version 2>&1))"
 echo "============================================"
 
 CMD=(
-  python3 scripts/run_evottt_benchmark.py
+  python3 -u scripts/run_evottt_benchmark.py
   --benchmark_csv "${BENCHMARK_CSV}"
   --msa_dir "${MSA_DIR}"
   --data_dir "${DATA_DIR}"

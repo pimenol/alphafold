@@ -22,6 +22,8 @@ from typing import Any, Dict
 import jax
 import numpy as np
 
+print(f'[init] jax/numpy imported, jax.devices={jax.devices()}', flush=True)
+
 # Silence TF warnings before importing AF2
 os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')
 
@@ -33,6 +35,7 @@ from alphafold.model import features as af_features
 from alphafold.model import model as af_model
 
 from alphafold.evottt.ttt import make_ttt_apply, run_ttt
+print('[init] all imports done', flush=True)
 
 
 # ---------------------------------------------------------------------------
