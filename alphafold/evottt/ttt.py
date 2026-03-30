@@ -16,6 +16,7 @@ import numpy as np
 import optax
 
 from alphafold.model import modules
+from alphafold.model.modules import softmax_cross_entropy
 
 from alphafold.evottt.lora import (
     LoRATarget,
@@ -155,10 +156,14 @@ def ttt_loss_fn(
     alpha: float,
     rank: int,
     apply_fn,
+    num_output: int,
     batch: Dict[str, Any],
     rng: jnp.ndarray,
 ) -> jnp.ndarray:
     """Compute masked-MSA loss with LoRA-adapted parameters.
+
+    Uses ``softmax_cross_entropy`` and the loss formula from
+    ``MaskedMsaHead.loss`` (modules.py lines 1068-1076).
 
     Only ``trainable`` (the LoRA A/B matrices) is differentiated.
 
@@ -169,6 +174,7 @@ def ttt_loss_fn(
         alpha: LoRA scaling factor.
         rank: LoRA rank.
         apply_fn: Haiku ``apply(params, rng, batch)`` from make_ttt_apply.
+        num_output: Number of output classes (from ``MaskedMsaHead.config``).
         batch: Feature dict (already re-masked for this step).
         rng: JAX PRNG key for the forward pass.
 
@@ -181,15 +187,21 @@ def ttt_loss_fn(
     # Merge LoRA deltas into base params
     merged_params = merge_lora_into_params(base_params, lora, alpha, rank)
 
-    # Forward pass
+    # Forward pass — produces logits via MaskedMsaHead.__call__ inside AlphaFold
     output = apply_fn(merged_params, rng, batch)
+    logits = output['masked_msa']['logits']  # (N_seq, N_res, num_output)
 
-    # Masked MSA loss (same formula as MaskedMsaHead.loss in modules.py)
-    logits = output['masked_msa']['logits']  # (N_seq, N_res, 23)
-    labels = jax.nn.one_hot(batch['true_msa'], num_classes=23)
-    errors = -jnp.sum(labels * jax.nn.log_softmax(logits), axis=-1)
-    loss = jnp.sum(errors * batch['bert_mask']) / (
-        1e-8 + jnp.sum(batch['bert_mask'])
+    # Squeeze ensemble dim so shapes match MaskedMsaHead.loss expectations:
+    # true_msa (N_seq, N_res), bert_mask (N_seq, N_res)
+    batch_sq = jax.tree.map(lambda x: x[0] if x.ndim > 0 else x, batch)
+
+    # MaskedMsaHead.loss (modules.py:1068-1076)
+    errors = softmax_cross_entropy(
+        labels=jax.nn.one_hot(batch_sq['true_msa'], num_classes=num_output),
+        logits=logits,
+    )
+    loss = jnp.sum(errors * batch_sq['bert_mask'], axis=(-2, -1)) / (
+        1e-8 + jnp.sum(batch_sq['bert_mask'], axis=(-2, -1))
     )
     return loss
 
@@ -201,11 +213,12 @@ def ttt_loss_fn(
 def run_ttt(
     apply_fn,
     base_params: Dict[str, Dict[str, Any]],
+    model_config,
     batch: Dict[str, Any],
     num_steps: int = 50,
-    learning_rate: float = 1e-4,
+    learning_rate: float = 3e-4,
     rank: int = 4,
-    last_n_blocks: int = 48,
+    last_n_blocks: int = 8,
     alpha: float = 1.0,
     grad_clip_norm: float = 1.0,
     replace_fraction: float = 0.15,
@@ -217,6 +230,8 @@ def run_ttt(
     Args:
         apply_fn: TTT apply function from ``make_ttt_apply``.
         base_params: Frozen pre-trained AF2 params.
+        model_config: AF2 model config (``config.model``), used to
+            instantiate ``MaskedMsaHead`` for loss computation.
         batch: Processed feature dict (with ensemble dim, as returned by
             ``process_features``).  Must contain ``'true_msa'``.
         num_steps: Number of TTT gradient steps.
@@ -239,6 +254,9 @@ def run_ttt(
 
     rng = jax.random.PRNGKey(seed)
 
+    # num_output from MaskedMsaHead config (23 for monomer: 20 AA + X + gap + MASK)
+    num_output = model_config.heads.masked_msa.num_output
+
     # --- 1. squeeze ensemble dim for TTT (expected shape: [N_seq, N_res]) ---
     # process_features adds a leading ensemble dim: (1, ...)
     batch_squeezed = jax.tree.map(lambda x: x[0] if x.ndim > 0 else x, batch)
@@ -252,10 +270,18 @@ def run_ttt(
     )
     trainable = trainable_from_lora(lora_meta)
 
-    # --- 3. optimizer --------------------------------------------------------
+    # --- 3. optimizer (warmup + cosine decay) --------------------------------
+    warmup_steps = max(1, num_steps // 10)
+    schedule = optax.warmup_cosine_decay_schedule(
+        init_value=0.0,
+        peak_value=learning_rate,
+        warmup_steps=warmup_steps,
+        decay_steps=num_steps,
+        end_value=learning_rate * 0.01,
+    )
     optimizer = optax.chain(
         optax.clip_by_global_norm(grad_clip_norm),
-        optax.adam(learning_rate),
+        optax.adam(schedule),
     )
     opt_state = optimizer.init(trainable)
 
@@ -278,7 +304,7 @@ def run_ttt(
         def _loss(trainable, batch, rng):
             return ttt_loss_fn(
                 trainable, base_params, lora_meta, alpha, rank,
-                apply_fn, batch, rng,
+                apply_fn, num_output, batch, rng,
             )
 
         loss, grads = jax.value_and_grad(_loss)(

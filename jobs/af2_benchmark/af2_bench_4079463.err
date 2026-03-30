@@ -1,0 +1,1202 @@
+<frozen importlib._bootstrap>:488: Warning: OpenSSL 3's legacy provider failed to load. Legacy algorithms will not be available. If you need those algorithms, check your OpenSSL configuration.
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5N0Y1 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A5A3S1 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A646QXE5 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A7T0Q4S0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5SDJ0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A516M7D4 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A516MKW5 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5MJ79 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J7WBC6 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5NLC8 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5PGQ8 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5LVF4 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J7WGP0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A7M1RZN8 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5PEH1 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5S650 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5MWI1 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5TJ08 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A2I7RXE1 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6M5CCM2 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A7G7XYI3 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A516M849 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A873WTE6 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J7X061 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A385EDS0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J7WXJ4 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A9E9FY57 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A5C0CHJ0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A3G1L3G8 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J7WFA3 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A481ZBD9 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5RVI2 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5MKI5 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A345AY83 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A7G9V4P1 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A1D8KSU4 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5LH40 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A873WX46 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5LY96 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5REU2 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A516KXX0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED M1HQI4 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J7WCN6 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A2I7QNR7 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A516KPU6 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A096VQ52 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A514CUI5 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A5J6VL79 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5RWQ2 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A2P1CCK1 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A2R4ALD2 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5RVV5 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5KW40 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5NEQ6 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5TUA9 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A7H0XFP0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5NL17 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5LVS4 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5NYU7 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED V9QJW0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5RV91 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5LPD9 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A0A7RC04 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A059T639 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A0K1Y5V5 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A248SK39 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5Q838 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J7W4X6 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A3G5AHB3 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5NPM4 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED V5L5Y1 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5NUH2 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A7S5UV26 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A140G6G5 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5QU80 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED R9RFX6 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5MMJ0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A385IRV1 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A514A736 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5P4W8 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A516LQB8 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A0A0RSM0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A160DF05 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5NNS2 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED K4FET1 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J7X5G4 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A2H4YG65 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5KFU1 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A516MBB3 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED F2Y2X0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A7M1CP40 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5P7E9 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J5L4Y7 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED UPI0023294216 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A1J0GP43 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED S0A3B0 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A8S5N253 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A5P8PST7 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A6J7WB17 rc=1
+Traceback (most recent call last):
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 732, in <module>
+    app.run(main)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/lib/python3.11/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/scratch/project/open-35-8/pimenol1/alphafold/run_alphafold.py", line 571, in main
+    raise ValueError(
+ValueError: Could not find path to the "jackhmmer" binary. Make sure it is installed on your system.
+FAILED A0A516MPW0 rc=1
+Failed (100): ['A0A6J5N0Y1', 'A5A3S1', 'A0A646QXE5', 'A0A7T0Q4S0', 'A0A8S5SDJ0', 'A0A516M7D4', 'A0A516MKW5', 'A0A8S5MJ79', 'A0A6J7WBC6', 'A0A6J5NLC8', 'A0A8S5PGQ8', 'A0A6J5LVF4', 'A0A6J7WGP0', 'A0A7M1RZN8', 'A0A8S5PEH1', 'A0A8S5S650', 'A0A6J5MWI1', 'A0A8S5TJ08', 'A0A2I7RXE1', 'A0A6M5CCM2', 'A0A7G7XYI3', 'A0A516M849', 'A0A873WTE6', 'A0A6J7X061', 'A0A385EDS0', 'A0A6J7WXJ4', 'A0A9E9FY57', 'A0A5C0CHJ0', 'A0A3G1L3G8', 'A0A6J7WFA3', 'A0A481ZBD9', 'A0A8S5RVI2', 'A0A8S5MKI5', 'A0A345AY83', 'A0A7G9V4P1', 'A0A1D8KSU4', 'A0A6J5LH40', 'A0A873WX46', 'A0A6J5LY96', 'A0A6J5REU2', 'A0A516KXX0', 'M1HQI4', 'A0A6J7WCN6', 'A0A2I7QNR7', 'A0A516KPU6', 'A0A096VQ52', 'A0A514CUI5', 'A0A5J6VL79', 'A0A8S5RWQ2', 'A0A2P1CCK1', 'A0A2R4ALD2', 'A0A8S5RVV5', 'A0A6J5KW40', 'A0A8S5NEQ6', 'A0A8S5TUA9', 'A0A7H0XFP0', 'A0A8S5NL17', 'A0A6J5LVS4', 'A0A6J5NYU7', 'V9QJW0', 'A0A8S5RV91', 'A0A6J5LPD9', 'A0A0A7RC04', 'A0A059T639', 'A0A0K1Y5V5', 'A0A248SK39', 'A0A8S5Q838', 'A0A6J7W4X6', 'A0A3G5AHB3', 'A0A8S5NPM4', 'V5L5Y1', 'A0A6J5NUH2', 'A0A7S5UV26', 'A0A140G6G5', 'A0A8S5QU80', 'R9RFX6', 'A0A6J5MMJ0', 'A0A385IRV1', 'A0A514A736', 'A0A8S5P4W8', 'A0A516LQB8', 'A0A0A0RSM0', 'A0A160DF05', 'A0A8S5NNS2', 'K4FET1', 'A0A6J7X5G4', 'A0A2H4YG65', 'A0A6J5KFU1', 'A0A516MBB3', 'F2Y2X0', 'A0A7M1CP40', 'A0A8S5P7E9', 'A0A6J5L4Y7', 'UPI0023294216', 'A0A1J0GP43', 'S0A3B0', 'A0A8S5N253', 'A0A5P8PST7', 'A0A6J7WB17', 'A0A516MPW0']

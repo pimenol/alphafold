@@ -119,17 +119,20 @@ def init_lora_params(
         num_blocks = w.shape[0]
         d_in, d_out = _weight_dims(name, w.shape)
 
+        # Standard LoRA convention (Hu et al.):
+        #   A (down-projection, d_in→rank): zero-init  → delta starts at zero
+        #   B (up-projection, rank→d_out): random Kaiming init
+        A = jnp.zeros((num_blocks, d_in, rank), dtype=w.dtype)
+
         rng_key, subkey = jax.random.split(rng_key)
-        bound = np.sqrt(1.0 / d_in)
-        A = jax.random.uniform(
-            subkey, (num_blocks, d_in, rank), minval=-bound, maxval=bound
-        )
+        bound = np.sqrt(1.0 / rank)
+        B = jax.random.uniform(
+            subkey, (num_blocks, rank, d_out), minval=-bound, maxval=bound,
+        ).astype(w.dtype)
         # Zero-out blocks we don't want to adapt
         start = num_blocks - last_n_blocks
-        mask = (jnp.arange(num_blocks) >= start).astype(A.dtype)
-        A = A * mask[:, None, None]
-
-        B = jnp.zeros((num_blocks, rank, d_out), dtype=w.dtype)
+        mask = (jnp.arange(num_blocks) >= start).astype(B.dtype)
+        B = B * mask[:, None, None]
 
         key = f'{scope}//{name}'
         lora[key] = {

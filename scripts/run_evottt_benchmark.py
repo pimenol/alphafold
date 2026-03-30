@@ -11,10 +11,17 @@ For each protein in the benchmark CSV:
 
 from __future__ import annotations
 
+import os
+# Must be set before JAX/XLA is imported to avoid Triton GEMM autotuner crash
+# when recompiling for different input shapes.
+os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')
+_xla = os.environ.get('XLA_FLAGS', '')
+if '--xla_gpu_enable_triton_gemm' not in _xla:
+    os.environ['XLA_FLAGS'] = f'{_xla} --xla_gpu_enable_triton_gemm=false'.strip()
+
 import argparse
 import csv
 import json
-import os
 import time
 from pathlib import Path
 from typing import Any, Dict
@@ -23,9 +30,6 @@ import jax
 import numpy as np
 
 print(f'[init] jax/numpy imported, jax.devices={jax.devices()}', flush=True)
-
-# Silence TF warnings before importing AF2
-os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')
 
 from alphafold.common import confidence, residue_constants
 from alphafold.data import parsers, pipeline
@@ -121,9 +125,9 @@ def main() -> int:
     parser.add_argument('--model_name', default='model_1_ptm')
     # TTT hyperparameters
     parser.add_argument('--ttt_steps', type=int, default=50)
-    parser.add_argument('--ttt_lr', type=float, default=1e-4)
+    parser.add_argument('--ttt_lr', type=float, default=3e-4)
     parser.add_argument('--lora_rank', type=int, default=4)
-    parser.add_argument('--last_n_blocks', type=int, default=48)
+    parser.add_argument('--last_n_blocks', type=int, default=8)
     parser.add_argument('--lora_alpha', type=float, default=1.0)
     parser.add_argument('--grad_clip', type=float, default=1.0)
     parser.add_argument('--mask_fraction', type=float, default=0.15)
@@ -169,11 +173,14 @@ def main() -> int:
         args.model_name, str(args.data_dir)
     )
 
-    # TTT config: no recycling, only masked_msa head
+    # TTT config: no recycling, reduced MSA for memory
     ttt_config = af_config.model_config(args.model_name)
     with ttt_config.unlocked():
         ttt_config.model.num_recycle = 0
         ttt_config.data.common.num_recycle = 0
+        # Reduce MSA size so gradient computation fits in GPU memory
+        ttt_config.data.eval.max_msa_clusters = 128
+        ttt_config.data.common.max_extra_msa = 1024
 
     ttt_apply = make_ttt_apply(ttt_config.model)
 
@@ -217,7 +224,11 @@ def main() -> int:
                 print(f'  Baseline pLDDT: {baseline_plddt:.2f}  ({baseline_time:.1f}s)')
             except Exception as e:
                 print(f'  Baseline failed: {e}')
-                continue
+                # Use CSV pLDDT if available, keep going with TTT
+                csv_plddt = row.get('pLDDT_AlphaFold')
+                if csv_plddt:
+                    baseline_plddt = float(csv_plddt)
+                    print(f'  Using CSV baseline pLDDT: {baseline_plddt:.2f}')
 
         # ---- TTT adaptation ------------------------------------------------
         try:
@@ -230,6 +241,7 @@ def main() -> int:
             adapted_params, ttt_losses = run_ttt(
                 apply_fn=ttt_apply,
                 base_params=base_params,
+                model_config=ttt_config.model,
                 batch=ttt_features,
                 num_steps=args.ttt_steps,
                 learning_rate=args.ttt_lr,

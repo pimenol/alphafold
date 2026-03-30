@@ -21,8 +21,11 @@
 # ---- CUDA ----
 module load CUDA/12.2.2 2>/dev/null || true
 module load cuDNN/8.9.2.26-CUDA-12.2.0 2>/dev/null || true
+XLA_FLAGS_EXTRA="--xla_gpu_enable_triton_gemm=false"
 if [[ -n "${EBROOTCUDA:-}" ]]; then
-  export XLA_FLAGS="--xla_gpu_cuda_data_dir=${EBROOTCUDA}"
+  export XLA_FLAGS="--xla_gpu_cuda_data_dir=${EBROOTCUDA} ${XLA_FLAGS_EXTRA}"
+else
+  export XLA_FLAGS="${XLA_FLAGS_EXTRA}"
 fi
 
 # ---- Conda ----
@@ -51,9 +54,9 @@ OUTPUT_DIR="${OUTPUT_DIR:-${REPO_ROOT}/evottt_outputs}"
 
 # ---- TTT hyperparameters ----
 TTT_STEPS="${TTT_STEPS:-50}"
-TTT_LR="${TTT_LR:-1e-4}"
+TTT_LR="${TTT_LR:-3e-4}"
 LORA_RANK="${LORA_RANK:-4}"
-LAST_N_BLOCKS="${LAST_N_BLOCKS:-48}"
+LAST_N_BLOCKS="${LAST_N_BLOCKS:-8}"
 LORA_ALPHA="${LORA_ALPHA:-1.0}"
 
 # ---- Subset ----
