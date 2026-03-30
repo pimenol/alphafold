@@ -59,6 +59,11 @@ LORA_RANK="${LORA_RANK:-4}"
 LAST_N_BLOCKS="${LAST_N_BLOCKS:-8}"
 LORA_ALPHA="${LORA_ALPHA:-1.0}"
 
+# ---- MSA generation (optional, for single-sequence input) ----
+JACKHMMER_BIN="${JACKHMMER_BIN:-}"
+SEQ_DATABASE="${SEQ_DATABASE:-}"
+MSA_N_CPU="${MSA_N_CPU:-8}"
+
 # ---- Subset ----
 START_IDX="${START_IDX:-0}"
 END_IDX="${END_IDX:-}"
@@ -94,6 +99,12 @@ fi
 
 if [[ -n "${PROTEIN_IDS}" ]]; then
   CMD+=(--protein_ids "${PROTEIN_IDS}")
+fi
+
+if [[ -n "${JACKHMMER_BIN}" && -n "${SEQ_DATABASE}" ]]; then
+  CMD+=(--jackhmmer_binary_path "${JACKHMMER_BIN}"
+        --seq_database_path "${SEQ_DATABASE}"
+        --msa_n_cpu "${MSA_N_CPU}")
 fi
 
 "${CMD[@]}" "$@"

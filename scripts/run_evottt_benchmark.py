@@ -22,9 +22,10 @@ if '--xla_gpu_enable_triton_gemm' not in _xla:
 import argparse
 import csv
 import json
+import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import jax
 import numpy as np
@@ -38,6 +39,7 @@ from alphafold.model import data as af_data
 from alphafold.model import features as af_features
 from alphafold.model import model as af_model
 
+from alphafold.data.tools import jackhmmer as jackhmmer_tool
 from alphafold.evottt.ttt import make_ttt_apply, run_ttt
 print('[init] all imports done', flush=True)
 
@@ -105,6 +107,61 @@ def compute_mean_plddt(prediction_result: Dict[str, Any]) -> float:
 
 
 # ---------------------------------------------------------------------------
+# MSA generation from single sequence (using AF2's JackHMMER)
+# ---------------------------------------------------------------------------
+
+def generate_msa(
+    sequence: str,
+    protein_id: str,
+    output_a3m_path: str,
+    jackhmmer_binary_path: str,
+    database_path: str,
+    n_cpu: int = 8,
+    max_sto_sequences: Optional[int] = 10000,
+) -> str:
+    """Run JackHMMER on a single sequence to generate an MSA, saved as A3M.
+
+    Uses AF2's built-in JackHMMER wrapper and parsers.  The result is
+    cached at *output_a3m_path* so subsequent runs skip the search.
+
+    Returns the path to the generated A3M file.
+    """
+    if Path(output_a3m_path).exists():
+        print(f'  MSA already cached at {output_a3m_path}')
+        return output_a3m_path
+
+    runner = jackhmmer_tool.Jackhmmer(
+        binary_path=jackhmmer_binary_path,
+        database_path=database_path,
+        n_cpu=n_cpu,
+    )
+
+    # Write a temporary FASTA for JackHMMER
+    with tempfile.NamedTemporaryFile(
+        mode='w', suffix='.fasta', delete=False
+    ) as fasta_fh:
+        fasta_fh.write(f'>{protein_id}\n{sequence}\n')
+        fasta_path = fasta_fh.name
+
+    try:
+        result = runner.query(fasta_path, max_sto_sequences)[0]
+    finally:
+        Path(fasta_path).unlink(missing_ok=True)
+
+    # Convert Stockholm → A3M using AF2's parser
+    sto_string = result['sto']
+    a3m_string = parsers.convert_stockholm_to_a3m(sto_string)
+
+    Path(output_a3m_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(output_a3m_path, 'w') as f:
+        f.write(a3m_string)
+
+    msa = parsers.parse_a3m(a3m_string)
+    print(f'  Generated MSA: {len(msa.sequences)} sequences → {output_a3m_path}')
+    return output_a3m_path
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -131,6 +188,15 @@ def main() -> int:
     parser.add_argument('--lora_alpha', type=float, default=1.0)
     parser.add_argument('--grad_clip', type=float, default=1.0)
     parser.add_argument('--mask_fraction', type=float, default=0.15)
+    # MSA generation (used when precomputed A3M is missing)
+    parser.add_argument('--jackhmmer_binary_path', default=None,
+                        help='Path to jackhmmer binary. Enables automatic MSA '
+                             'generation when a precomputed A3M is not found.')
+    parser.add_argument('--seq_database_path', default=None,
+                        help='Path to sequence database for JackHMMER '
+                             '(e.g. uniref90.fasta or small_bfd).')
+    parser.add_argument('--msa_n_cpu', type=int, default=8,
+                        help='CPUs for JackHMMER MSA search.')
     # Subset selection
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--protein_ids', default=None,
@@ -193,8 +259,25 @@ def main() -> int:
         a3m_path = args.msa_dir / f'{pid}.a3m'
 
         if not a3m_path.exists():
-            print(f'[{i}] {pid}: MSA not found at {a3m_path}, skipping')
-            continue
+            if args.jackhmmer_binary_path and args.seq_database_path:
+                print(f'[{i}] {pid}: No precomputed A3M, running MSA search...')
+                try:
+                    a3m_path = Path(generate_msa(
+                        sequence=seq,
+                        protein_id=pid,
+                        output_a3m_path=str(args.msa_dir / f'{pid}.a3m'),
+                        jackhmmer_binary_path=args.jackhmmer_binary_path,
+                        database_path=args.seq_database_path,
+                        n_cpu=args.msa_n_cpu,
+                    ))
+                except Exception as e:
+                    print(f'[{i}] {pid}: MSA generation failed: {e}')
+                    continue
+            else:
+                print(f'[{i}] {pid}: MSA not found at {a3m_path}, skipping '
+                      '(use --jackhmmer_binary_path and --seq_database_path '
+                      'to enable automatic MSA generation)')
+                continue
 
         protein_dir = args.output_dir / pid
         result_path = protein_dir / 'evottt_result.json'
