@@ -1,0 +1,15 @@
+# EvoTTT experiment — adapt all 48 Evoformer blocks
+# Tests full-model adaptation vs last-N-only
+
+model_name: model_1_ptm
+
+ttt_steps: 50
+ttt_lr: 1.0e-4
+lora_rank: 4
+last_n_blocks: 48
+lora_alpha: 1.0
+grad_clip: 1.0
+mask_fraction: 0.15
+
+seed: 0
+skip_existing: true

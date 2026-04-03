@@ -1,0 +1,37 @@
+# EvoTTT experiment config — default / baseline settings
+# Usage: python scripts/launch_evottt.py configs/evottt/default.yaml
+
+# SLURM settings
+slurm:
+  time: "48:00:00"
+  gpus: 1
+  cpus_per_task: 8
+  partition: qgpu
+  account: OPEN-35-8
+
+# Model
+model_name: model_1_ptm
+
+# TTT hyperparameters
+ttt_steps: 50
+ttt_lr: 3.0e-4
+lora_rank: 4
+last_n_blocks: 8
+lora_alpha: 1.0
+grad_clip: 1.0
+mask_fraction: 0.15
+
+# Data paths (defaults match run_evottt.sh)
+# data_dir: /scratch/project/open-35-8/pimenol1/af2_data
+msa_dir: /scratch/project/open-35-8/data/bfvd/bfvd_beta
+benchmark_csv: /scratch/project/open-35-8/data/bfvd/bfvd_beta/sample_100_proteins.csv
+
+# Subset selection (all optional)
+# protein_ids: "P12345,P67890"
+# start_idx: 0
+# end_idx: 10
+seed: 0
+
+# Flags
+skip_existing: true
+skip_baseline: false

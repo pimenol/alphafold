@@ -58,6 +58,8 @@ TTT_LR="${TTT_LR:-3e-4}"
 LORA_RANK="${LORA_RANK:-4}"
 LAST_N_BLOCKS="${LAST_N_BLOCKS:-8}"
 LORA_ALPHA="${LORA_ALPHA:-1.0}"
+GRAD_CLIP="${GRAD_CLIP:-1.0}"
+MASK_FRACTION="${MASK_FRACTION:-0.15}"
 
 # ---- MSA generation (optional, for single-sequence input) ----
 JACKHMMER_BIN="${JACKHMMER_BIN:-}"
@@ -89,6 +91,8 @@ CMD=(
   --lora_rank "${LORA_RANK}"
   --last_n_blocks "${LAST_N_BLOCKS}"
   --lora_alpha "${LORA_ALPHA}"
+  --grad_clip "${GRAD_CLIP}"
+  --mask_fraction "${MASK_FRACTION}"
   --start_idx "${START_IDX}"
   --skip_existing
 )
