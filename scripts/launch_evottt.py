@@ -193,6 +193,7 @@ def run_local(cfg: dict) -> None:
         'lora_alpha': '--lora_alpha',
         'grad_clip': '--grad_clip',
         'mask_fraction': '--mask_fraction',
+        'eval_interval': '--eval_interval',
         'seed': '--seed',
         'start_idx': '--start_idx',
         'end_idx': '--end_idx',

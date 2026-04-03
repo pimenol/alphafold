@@ -7,7 +7,9 @@ Provides:
 """
 
 import copy
-from typing import Any, Dict, List, Optional, Tuple
+import logging
+import time as time_mod
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import haiku as hk
 import jax
@@ -17,6 +19,8 @@ import optax
 
 from alphafold.model import modules
 from alphafold.model.modules import softmax_cross_entropy
+
+logger = logging.getLogger('evottt')
 
 from alphafold.evottt.lora import (
     LoRATarget,
@@ -224,7 +228,9 @@ def run_ttt(
     replace_fraction: float = 0.15,
     seed: int = 0,
     targets: Optional[List[LoRATarget]] = None,
-) -> Tuple[Dict[str, Dict[str, Any]], List[float]]:
+    eval_fn: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
+    eval_interval: int = 1,
+) -> Tuple[Dict[str, Dict[str, Any]], List[float], List[Dict[str, Any]]]:
     """Run test-time training and return adapted parameters.
 
     Args:
@@ -316,16 +322,57 @@ def run_ttt(
 
     # --- 5. training loop ----------------------------------------------------
     losses: List[float] = []
+    eval_logs: List[Dict[str, Any]] = []
+
+    def _merge_current_params():
+        cur_lora = update_lora_from_trainable(lora_meta, trainable)
+        return merge_lora_into_params(base_params, cur_lora, alpha, rank)
+
+    # Step 0: evaluate before any training
+    if eval_fn is not None:
+        t_eval = time_mod.time()
+        eval_result = eval_fn(_merge_current_params())
+        eval_time = time_mod.time() - t_eval
+        plddt = eval_result.get('plddt')
+        entry = {'step': 0, 'loss': None, 'ttt_step_time': 0.0,
+                 'eval_step_time': eval_time, 'plddt': plddt}
+        eval_logs.append(entry)
+        logger.info(
+            'step: 0, loss: None, ttt_step_time: 0.00000, '
+            'eval_step_time: %.5f, plddt: %s',
+            eval_time, f'{plddt:.5f}' if plddt is not None else 'None')
+
     for i in range(num_steps):
+        t_step = time_mod.time()
         trainable, opt_state, loss_val, rng = step(
             trainable, opt_state, batch_squeezed, rng,
         )
-        losses.append(float(loss_val))
-        if i % 10 == 0 or i == num_steps - 1:
+        ttt_step_time = time_mod.time() - t_step
+        loss_float = float(loss_val)
+        losses.append(loss_float)
+
+        should_eval = eval_fn is not None and eval_interval > 0 and (
+            (i + 1) % eval_interval == 0 or i == num_steps - 1
+        )
+        if should_eval:
+            t_eval = time_mod.time()
+            eval_result = eval_fn(_merge_current_params())
+            eval_time = time_mod.time() - t_eval
+            plddt = eval_result.get('plddt')
+            entry = {'step': i + 1, 'loss': loss_float,
+                     'ttt_step_time': ttt_step_time,
+                     'eval_step_time': eval_time, 'plddt': plddt}
+            eval_logs.append(entry)
+            logger.info(
+                'step: %d, loss: %.5f, ttt_step_time: %.5f, '
+                'eval_step_time: %.5f, plddt: %s',
+                i + 1, loss_float, ttt_step_time, eval_time,
+                f'{plddt:.5f}' if plddt is not None else 'None')
+        elif i % 10 == 0 or i == num_steps - 1:
             print(f'  TTT step {i:>3d}/{num_steps}: loss = {loss_val:.4f}')
 
     # --- 6. merge final LoRA into base params --------------------------------
     final_lora = update_lora_from_trainable(lora_meta, trainable)
     adapted_params = merge_lora_into_params(base_params, final_lora, alpha, rank)
 
-    return adapted_params, losses
+    return adapted_params, losses, eval_logs

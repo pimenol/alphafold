@@ -22,6 +22,7 @@ if '--xla_gpu_enable_triton_gemm' not in _xla:
 import argparse
 import csv
 import json
+import logging
 import tempfile
 import time
 from pathlib import Path
@@ -166,6 +167,11 @@ def generate_msa(
 # ---------------------------------------------------------------------------
 
 def main() -> int:
+    logging.basicConfig(
+        format='%(asctime)s | %(levelname)s | %(message)s',
+        level=logging.INFO,
+    )
+
     default_csv = Path(
         '/scratch/project/open-35-8/pimenol1/ProteinTTT/'
         'ProteinTTT_fresh/data/benchmark/summary.csv'
@@ -188,6 +194,8 @@ def main() -> int:
     parser.add_argument('--lora_alpha', type=float, default=1.0)
     parser.add_argument('--grad_clip', type=float, default=1.0)
     parser.add_argument('--mask_fraction', type=float, default=0.15)
+    parser.add_argument('--eval_interval', type=int, default=1,
+                        help='Evaluate pLDDT every N TTT steps (0 to disable).')
     # MSA generation (used when precomputed A3M is missing)
     parser.add_argument('--jackhmmer_binary_path', default=None,
                         help='Path to jackhmmer binary. Enables automatic MSA '
@@ -249,6 +257,16 @@ def main() -> int:
         ttt_config.data.common.max_extra_msa = 1024
 
     ttt_apply = make_ttt_apply(ttt_config.model)
+
+    # Eval config: full model (all heads) but no recycling for speed
+    eval_config = None
+    eval_runner = None
+    if args.eval_interval > 0:
+        eval_config = af_config.model_config(args.model_name)
+        with eval_config.unlocked():
+            eval_config.model.num_recycle = 0
+            eval_config.data.common.num_recycle = 0
+        eval_runner = af_model.RunModel(eval_config, params=base_params)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     results = []
@@ -320,8 +338,30 @@ def main() -> int:
                 random_seed=args.seed,
             )
 
+            # Build per-step pLDDT eval function
+            eval_fn = None
+            if eval_runner is not None:
+                eval_features = load_features_from_a3m(
+                    str(a3m_path), seq, pid, eval_config,
+                    random_seed=args.seed,
+                )
+                _runner = eval_runner
+                _feat = eval_features
+                _seed = args.seed
+                def eval_fn(adapted_params):
+                    result = _runner.apply(
+                        adapted_params,
+                        jax.random.PRNGKey(_seed),
+                        _feat,
+                    )
+                    jax.tree.map(lambda x: x.block_until_ready(), result)
+                    plddt = confidence.compute_plddt(
+                        result['predicted_lddt']['logits']
+                    )
+                    return {'plddt': float(np.mean(plddt))}
+
             t0 = time.time()
-            adapted_params, ttt_losses = run_ttt(
+            adapted_params, ttt_losses, eval_logs = run_ttt(
                 apply_fn=ttt_apply,
                 base_params=base_params,
                 model_config=ttt_config.model,
@@ -334,6 +374,8 @@ def main() -> int:
                 grad_clip_norm=args.grad_clip,
                 replace_fraction=args.mask_fraction,
                 seed=args.seed,
+                eval_fn=eval_fn,
+                eval_interval=args.eval_interval,
             )
             ttt_time = time.time() - t0
             print(f'  TTT: {args.ttt_steps} steps in {ttt_time:.1f}s, '
@@ -382,6 +424,7 @@ def main() -> int:
             'ttt_loss_end': ttt_losses[-1],
             'ttt_losses': ttt_losses,
             'ttt_time_s': ttt_time,
+            'eval_logs': eval_logs,
         }
         results.append(result)
 
