@@ -1,0 +1,50 @@
+Loading defaults from: /scratch/project/open-35-8/pimenol1/alphafold/configs/evottt/default.yaml
+============================================
+EvoTTT benchmark run
+Job ID: 4113743
+Node: acn14.karolina.it4i.cz
+TTT: steps=20 lr=0.0003 rank=8 blocks=8 alpha=16
+Python: /scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/bin/python3 (Python 3.11.15)
+============================================
+[init] jax/numpy imported, jax.devices=[cuda(id=0)]
+[init] all imports done
+Model: model_1_ptm
+TTT: steps=20 lr=0.0003 rank=8 blocks=8 alpha=16.0
+
+[0] A0A1W6I162 (len=187, nmsa=?) ...
+2026-04-04 15:33:58,075 | INFO | Running predict with shape(feat) = {'aatype': (4, 187), 'atom14_atom_exists': (4, 187, 14), 'atom37_atom_exists': (4, 187, 37), 'bert_mask': (4, 508, 187), 'extra_deletion_value': (4, 5120, 187), 'extra_has_deletion': (4, 5120, 187), 'extra_msa': (4, 5120, 187), 'extra_msa_mask': (4, 5120, 187), 'extra_msa_row_mask': (4, 5120), 'is_distillation': (4,), 'msa_feat': (4, 508, 187, 49), 'msa_mask': (4, 508, 187), 'msa_row_mask': (4, 508), 'random_crop_to_size_seed': (4, 2), 'residue_index': (4, 187), 'residx_atom14_to_atom37': (4, 187, 14), 'residx_atom37_to_atom14': (4, 187, 37), 'seq_length': (4,), 'seq_mask': (4, 187), 'target_feat': (4, 187, 22), 'template_aatype': (4, 4, 187), 'template_all_atom_masks': (4, 4, 187, 37), 'template_all_atom_positions': (4, 4, 187, 37, 3), 'template_mask': (4, 4), 'template_pseudo_beta': (4, 4, 187, 3), 'template_pseudo_beta_mask': (4, 4, 187), 'template_sum_probs': (4, 4, 1), 'true_msa': (4, 508, 187)}
+2026-04-04 15:35:04,607 | INFO | Output shape was {'aligned_confidence_probs': (187, 187, 64), 'distogram': {'bin_edges': (63,), 'logits': (187, 187, 64)}, 'experimentally_resolved': {'logits': (187, 37)}, 'masked_msa': {'logits': (508, 187, 23)}, 'max_predicted_aligned_error': (), 'plddt': (187,), 'predicted_aligned_error': (187, 187), 'predicted_lddt': {'logits': (187, 50)}, 'ptm': (), 'ranking_confidence': (), 'structure_module': {'final_atom_mask': (187, 37), 'final_atom_positions': (187, 37, 3)}}
+  Baseline pLDDT: 26.22  (66.5s)
+2026-04-04 15:35:32,962 | INFO | step: 0, loss: None, ttt_step_time: 0.00000, eval_step_time: 26.95794, plddt: 26.47067
+2026-04-04 15:37:21,546 | INFO | step: 1, loss: 0.31230, ttt_step_time: 102.94633, eval_step_time: 5.62990, plddt: 26.47067
+2026-04-04 15:38:45,431 | INFO | step: 2, loss: 0.22511, ttt_step_time: 78.19369, eval_step_time: 5.66661, plddt: 26.46851
+2026-04-04 15:40:09,603 | INFO | step: 3, loss: 0.28968, ttt_step_time: 78.45813, eval_step_time: 5.68679, plddt: 26.44428
+2026-04-04 15:41:33,360 | INFO | step: 4, loss: 0.16465, ttt_step_time: 78.07376, eval_step_time: 5.66354, plddt: 26.44036
+2026-04-04 15:42:57,163 | INFO | step: 5, loss: 0.17351, ttt_step_time: 78.13130, eval_step_time: 5.64948, plddt: 26.47201
+2026-04-04 15:44:20,639 | INFO | step: 6, loss: 0.14442, ttt_step_time: 77.81848, eval_step_time: 5.63898, plddt: 26.47995
+2026-04-04 15:45:44,367 | INFO | step: 7, loss: 0.12258, ttt_step_time: 78.08175, eval_step_time: 5.62677, plddt: 26.48011
+2026-04-04 15:47:07,444 | INFO | step: 8, loss: 0.08597, ttt_step_time: 77.42546, eval_step_time: 5.63168, plddt: 26.45963
+2026-04-04 15:48:30,481 | INFO | step: 9, loss: 0.05669, ttt_step_time: 77.37840, eval_step_time: 5.64034, plddt: 26.49094
+2026-04-04 15:49:53,878 | INFO | step: 10, loss: 0.04556, ttt_step_time: 77.72583, eval_step_time: 5.65157, plddt: 26.48954
+2026-04-04 15:51:17,376 | INFO | step: 11, loss: 0.05024, ttt_step_time: 77.85079, eval_step_time: 5.62740, plddt: 26.47800
+2026-04-04 15:52:40,836 | INFO | step: 12, loss: 0.03005, ttt_step_time: 77.77928, eval_step_time: 5.65978, plddt: 26.47688
+2026-04-04 15:54:09,194 | INFO | step: 13, loss: 0.02938, ttt_step_time: 82.68667, eval_step_time: 5.65077, plddt: 26.47576
+2026-04-04 15:55:32,700 | INFO | step: 14, loss: 0.03022, ttt_step_time: 77.81654, eval_step_time: 5.66486, plddt: 26.47701
+2026-04-04 15:56:56,019 | INFO | step: 15, loss: 0.02438, ttt_step_time: 77.66154, eval_step_time: 5.63647, plddt: 26.48070
+2026-04-04 15:58:19,380 | INFO | step: 16, loss: 0.01842, ttt_step_time: 77.69028, eval_step_time: 5.65059, plddt: 26.47982
+2026-04-04 15:59:42,903 | INFO | step: 17, loss: 0.02111, ttt_step_time: 77.85350, eval_step_time: 5.64988, plddt: 26.47842
+2026-04-04 16:01:06,537 | INFO | step: 18, loss: 0.01503, ttt_step_time: 77.95517, eval_step_time: 5.65778, plddt: 26.47884
+2026-04-04 16:02:29,620 | INFO | step: 19, loss: 0.01484, ttt_step_time: 77.42574, eval_step_time: 5.63813, plddt: 26.48100
+2026-04-04 16:03:53,291 | INFO | step: 20, loss: 0.01714, ttt_step_time: 77.96877, eval_step_time: 5.68581, plddt: 26.48024
+  TTT: 20 steps in 1727.8s, loss 0.3123 → 0.0171
+2026-04-04 16:03:54,829 | INFO | Running predict with shape(feat) = {'aatype': (4, 187), 'atom14_atom_exists': (4, 187, 14), 'atom37_atom_exists': (4, 187, 37), 'bert_mask': (4, 508, 187), 'extra_deletion_value': (4, 5120, 187), 'extra_has_deletion': (4, 5120, 187), 'extra_msa': (4, 5120, 187), 'extra_msa_mask': (4, 5120, 187), 'extra_msa_row_mask': (4, 5120), 'is_distillation': (4,), 'msa_feat': (4, 508, 187, 49), 'msa_mask': (4, 508, 187), 'msa_row_mask': (4, 508), 'random_crop_to_size_seed': (4, 2), 'residue_index': (4, 187), 'residx_atom14_to_atom37': (4, 187, 14), 'residx_atom37_to_atom14': (4, 187, 37), 'seq_length': (4,), 'seq_mask': (4, 187), 'target_feat': (4, 187, 22), 'template_aatype': (4, 4, 187), 'template_all_atom_masks': (4, 4, 187, 37), 'template_all_atom_positions': (4, 4, 187, 37, 3), 'template_mask': (4, 4), 'template_pseudo_beta': (4, 4, 187, 3), 'template_pseudo_beta_mask': (4, 4, 187), 'template_sum_probs': (4, 4, 1), 'true_msa': (4, 508, 187)}
+2026-04-04 16:04:58,505 | INFO | Output shape was {'aligned_confidence_probs': (187, 187, 64), 'distogram': {'bin_edges': (63,), 'logits': (187, 187, 64)}, 'experimentally_resolved': {'logits': (187, 37)}, 'masked_msa': {'logits': (508, 187, 23)}, 'max_predicted_aligned_error': (), 'plddt': (187,), 'predicted_aligned_error': (187, 187), 'predicted_lddt': {'logits': (187, 50)}, 'ptm': (), 'ranking_confidence': (), 'structure_module': {'final_atom_mask': (187, 37), 'final_atom_positions': (187, 37, 3)}}
+  Adapted pLDDT: 26.40  (63.7s)
+  Δ pLDDT: +0.18
+
+=== Summary (1 proteins) ===
+Mean Δ pLDDT:   +0.18
+Median Δ pLDDT: +0.18
+Min / Max:      +0.18 / +0.18
+Results saved to /scratch/project/open-35-8/pimenol1/alphafold/evottt_outputs/evottt_summary.csv
+Job finished.

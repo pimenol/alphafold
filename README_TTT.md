@@ -45,7 +45,7 @@ with ttt_config.unlocked():
 ttt_apply = make_ttt_apply(ttt_config.model)
 
 # 4. Run TTT
-adapted_params, losses, eval_logs = run_ttt(
+adapted_params, losses, eval_logs, best_step = run_ttt(
     apply_fn=ttt_apply,
     base_params=params,
     model_config=ttt_config.model,

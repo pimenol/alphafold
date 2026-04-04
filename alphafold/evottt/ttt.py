@@ -230,7 +230,7 @@ def run_ttt(
     targets: Optional[List[LoRATarget]] = None,
     eval_fn: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
     eval_interval: int = 1,
-) -> Tuple[Dict[str, Dict[str, Any]], List[float], List[Dict[str, Any]]]:
+) -> Tuple[Dict[str, Dict[str, Any]], List[float], List[Dict[str, Any]], int]:
     """Run test-time training and return adapted parameters.
 
     Args:
@@ -251,9 +251,11 @@ def run_ttt(
         targets: LoRA targets.  If *None*, auto-discovered.
 
     Returns:
-        ``(adapted_params, losses)`` where *adapted_params* is the base
-        params with final LoRA deltas merged in, and *losses* is a list
-        of per-step loss values.
+        ``(adapted_params, losses, eval_logs, best_step)`` where
+        *adapted_params* has LoRA deltas from the step with the highest
+        pLDDT merged in (or the final step if no eval_fn is provided),
+        *losses* is a list of per-step loss values, and *best_step* is
+        the TTT step index that was selected (-1 if no eval).
     """
     if targets is None:
         targets = find_lora_targets(base_params)
@@ -324,9 +326,21 @@ def run_ttt(
     losses: List[float] = []
     eval_logs: List[Dict[str, Any]] = []
 
+    # Track best pLDDT and corresponding trainable params
+    best_plddt: Optional[float] = None
+    best_step: int = -1
+    best_trainable: Optional[Dict[str, Dict[str, jnp.ndarray]]] = None
+
     def _merge_current_params():
         cur_lora = update_lora_from_trainable(lora_meta, trainable)
         return merge_lora_into_params(base_params, cur_lora, alpha, rank)
+
+    def _update_best(step_idx, plddt_val):
+        nonlocal best_plddt, best_step, best_trainable
+        if plddt_val is not None and (best_plddt is None or plddt_val > best_plddt):
+            best_plddt = plddt_val
+            best_step = step_idx
+            best_trainable = jax.tree.map(lambda x: x.copy(), trainable)
 
     # Step 0: evaluate before any training
     if eval_fn is not None:
@@ -337,6 +351,7 @@ def run_ttt(
         entry = {'step': 0, 'loss': None, 'ttt_step_time': 0.0,
                  'eval_step_time': eval_time, 'plddt': plddt}
         eval_logs.append(entry)
+        _update_best(0, plddt)
         logger.info(
             'step: 0, loss: None, ttt_step_time: 0.00000, '
             'eval_step_time: %.5f, plddt: %s',
@@ -363,6 +378,7 @@ def run_ttt(
                      'ttt_step_time': ttt_step_time,
                      'eval_step_time': eval_time, 'plddt': plddt}
             eval_logs.append(entry)
+            _update_best(i + 1, plddt)
             logger.info(
                 'step: %d, loss: %.5f, ttt_step_time: %.5f, '
                 'eval_step_time: %.5f, plddt: %s',
@@ -371,8 +387,15 @@ def run_ttt(
         elif i % 10 == 0 or i == num_steps - 1:
             print(f'  TTT step {i:>3d}/{num_steps}: loss = {loss_val:.4f}')
 
-    # --- 6. merge final LoRA into base params --------------------------------
-    final_lora = update_lora_from_trainable(lora_meta, trainable)
-    adapted_params = merge_lora_into_params(base_params, final_lora, alpha, rank)
+    # --- 6. merge best (or final) LoRA into base params ----------------------
+    if best_trainable is not None:
+        logger.info('Using best pLDDT params from step %d (pLDDT=%.5f)',
+                     best_step, best_plddt)
+        best_lora = update_lora_from_trainable(lora_meta, best_trainable)
+        adapted_params = merge_lora_into_params(base_params, best_lora, alpha, rank)
+    else:
+        # No eval_fn provided — fall back to final step
+        final_lora = update_lora_from_trainable(lora_meta, trainable)
+        adapted_params = merge_lora_into_params(base_params, final_lora, alpha, rank)
 
-    return adapted_params, losses, eval_logs
+    return adapted_params, losses, eval_logs, best_step

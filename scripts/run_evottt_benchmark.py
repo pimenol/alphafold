@@ -361,7 +361,7 @@ def main() -> int:
                     return {'plddt': float(np.mean(plddt))}
 
             t0 = time.time()
-            adapted_params, ttt_losses, eval_logs = run_ttt(
+            adapted_params, ttt_losses, eval_logs, best_step = run_ttt(
                 apply_fn=ttt_apply,
                 base_params=base_params,
                 model_config=ttt_config.model,
@@ -378,8 +378,10 @@ def main() -> int:
                 eval_interval=args.eval_interval,
             )
             ttt_time = time.time() - t0
+            best_info = f', best_step={best_step}' if best_step >= 0 else ''
             print(f'  TTT: {args.ttt_steps} steps in {ttt_time:.1f}s, '
-                  f'loss {ttt_losses[0]:.4f} → {ttt_losses[-1]:.4f}')
+                  f'loss {ttt_losses[0]:.4f} → {ttt_losses[-1]:.4f}'
+                  f'{best_info}')
         except Exception as e:
             print(f'  TTT failed: {e}')
             continue
@@ -424,6 +426,7 @@ def main() -> int:
             'ttt_loss_end': ttt_losses[-1],
             'ttt_losses': ttt_losses,
             'ttt_time_s': ttt_time,
+            'best_step': best_step,
             'eval_logs': eval_logs,
         }
         results.append(result)
