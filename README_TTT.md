@@ -45,9 +45,10 @@ with ttt_config.unlocked():
 ttt_apply = make_ttt_apply(ttt_config.model)
 
 # 4. Run TTT
-adapted_params, losses = run_ttt(
+adapted_params, losses, eval_logs = run_ttt(
     apply_fn=ttt_apply,
     base_params=params,
+    model_config=ttt_config.model,
     batch=features,
     num_steps=50,
     learning_rate=1e-4,
@@ -73,10 +74,27 @@ python scripts/run_evottt_benchmark.py \
     --ttt_steps 50 \
     --ttt_lr 3e-4 \
     --lora_rank 4 \
-    --last_n_blocks 8
+    --last_n_blocks 8 \
+    --eval_interval 1
 ```
 
-### SLURM
+### YAML config (recommended)
+
+```bash
+# Submit as SLURM job from a YAML config:
+python scripts/launch_evottt.py configs/evottt/default.yaml
+
+# Override any hparam from CLI:
+python scripts/launch_evottt.py configs/evottt/default.yaml --ttt_lr 1e-3 --ttt_steps 100
+
+# Run locally (no SLURM):
+python scripts/launch_evottt.py configs/evottt/default.yaml --local
+
+# Dry-run (print the sbatch script without submitting):
+python scripts/launch_evottt.py configs/evottt/default.yaml --dry_run
+```
+
+### SLURM (direct)
 
 ```bash
 sbatch jobs/evottt/run_evottt.sh
@@ -100,6 +118,7 @@ TTT_STEPS=100 TTT_LR=5e-5 LORA_RANK=8 PROTEIN_IDS=A0A6J5N0Y1,A5A3S1 \
 | `lora_alpha` | 1.0 | LoRA scaling factor |
 | `grad_clip` | 1.0 | Gradient clipping norm |
 | `mask_fraction` | 0.15 | MSA masking fraction per step |
+| `eval_interval` | 1 | Evaluate pLDDT every N TTT steps (0 to disable) |
 
 ## Architecture
 
@@ -137,6 +156,19 @@ Summary: `evottt_outputs/evottt_summary.csv` with columns:
 `id, length, nmsa, baseline_plddt, adapted_plddt, delta_plddt,
 ttt_loss_start, ttt_loss_end, ttt_time_s`
 
+### Per-step logging
+
+When `eval_interval > 0`, each TTT step logs pLDDT to the Python `evottt`
+logger:
+
+```
+2026-04-03 12:00:01,234 | INFO | step: 0, loss: None, ttt_step_time: 0.00000, eval_step_time: 1.75260, plddt: 81.13863
+2026-04-03 12:00:04,567 | INFO | step: 1, loss: 2.62891, ttt_step_time: 2.09960, eval_step_time: 0.92640, plddt: 81.53083
+```
+
+Step 0 is the baseline (before any training). The per-step `eval_logs` are
+also saved in each protein's `evottt_result.json`.
+
 ## Code Structure
 
 | File | Description |
@@ -144,4 +176,6 @@ ttt_loss_start, ttt_loss_end, ttt_time_s`
 | `alphafold/evottt/lora.py` | LoRA init, merge, target discovery |
 | `alphafold/evottt/ttt.py` | TTT forward function, MSA re-masking, training loop |
 | `scripts/run_evottt_benchmark.py` | End-to-end benchmark script |
+| `scripts/launch_evottt.py` | Launch experiments from YAML configs |
+| `configs/evottt/default.yaml` | Default experiment config |
 | `jobs/evottt/run_evottt.sh` | SLURM job submission script |

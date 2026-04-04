@@ -1,0 +1,226 @@
+============================================
+EvoTTT benchmark run
+Job ID: 4112393
+Node: acn09.karolina.it4i.cz
+TTT: steps=20 lr=3e-4 rank=64 blocks=48 alpha=128
+Python: /scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/bin/python3 (Python 3.11.15)
+============================================
+[init] jax/numpy imported, jax.devices=[cuda(id=0)]
+[init] all imports done
+Model: model_1_ptm
+TTT: steps=20 lr=0.0003 rank=64 blocks=48 alpha=128.0
+
+[0] Q38267 (len=63, nmsa=?) ...
+  Baseline pLDDT: 93.89  (67.0s)
+  TTT: 20 steps in 220.2s, loss 0.4345 → 0.3926
+  Adapted pLDDT: 94.09  (62.1s)
+  Δ pLDDT: +0.20
+
+[1] A0A0U1UXW0 (len=295, nmsa=?) ...
+  Baseline pLDDT: 88.52  (77.1s)
+  TTT failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 318263369832 bytes.
+BufferAssignment OOM Debugging.
+BufferAssignment stats:
+             parameter allocation:  156.44MiB
+              constant allocation:  694.06MiB
+        maybe_live_out allocation:  144.00MiB
+     preallocated temp allocation:  296.41GiB
+                 total allocation:  297.38GiB
+Peak buffers:
+	Buffer 1:
+		Size: 18.17GiB
+		XLA Label: fusion
+		Shape: f32[48,73,4,4,295,295]
+		==========================
+
+	Buffer 2:
+		Size: 18.17GiB
+		XLA Label: fusion
+		Shape: f32[48,73,4,4,295,295]
+		==========================
+
+	Buffer 3:
+		Size: 18.17GiB
+		XLA Label: fusion
+		Shape: f32[48,73,4,4,295,295]
+		==========================
+
+	Buffer 4:
+		Size: 18.17GiB
+		XLA Label: fusion
+		Shape: f32[48,73,4,4,295,295]
+		==========================
+
+	Buffer 5:
+		Size: 15.93GiB
+		XLA Label: fusion
+		Shape: f32[48,32,4,8,295,295]
+		==========================
+
+	Buffer 6:
+		Size: 15.93GiB
+		XLA Label: fusion
+		Shape: f32[48,32,4,8,295,295]
+		==========================
+
+	Buffer 7:
+		Size: 6.84GiB
+		XLA Label: fusion
+		Shape: f32[48,73,4,8,128,128]
+		==========================
+
+	Buffer 8:
+		Size: 6.84GiB
+		XLA Label: fusion
+		Shape: f32[48,73,4,8,128,128]
+		==========================
+
+	Buffer 9:
+		Size: 1.99GiB
+		XLA Label: fusion
+		Shape: f32[48,295,295,128]
+		==========================
+
+	Buffer 10:
+		Size: 1.99GiB
+		XLA Label: fusion
+		Shape: f32[48,295,295,128]
+		==========================
+
+	Buffer 11:
+		Size: 1.99GiB
+		XLA Label: fusion
+		Shape: f32[48,295,295,128]
+		==========================
+
+	Buffer 12:
+		Size: 1.99GiB
+		XLA Label: fusion
+		Shape: f32[48,295,295,128]
+		==========================
+
+	Buffer 13:
+		Size: 1.99GiB
+		XLA Label: fusion
+		Shape: f32[48,295,295,128]
+		==========================
+
+	Buffer 14:
+		Size: 1.99GiB
+		XLA Label: fusion
+		Shape: f32[48,295,295,128]
+		==========================
+
+	Buffer 15:
+		Size: 1.99GiB
+		XLA Label: fusion
+		Shape: f32[48,295,295,128]
+		==========================
+
+
+
+[2] A0A1W6I162 (len=187, nmsa=?) ...
+  Baseline pLDDT: 26.22  (68.2s)
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 12 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[3] A0A868BQY3 (len=152, nmsa=?) ...
+  Baseline pLDDT: 91.99  (63.2s)
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[4] A0A5P1KV95 (len=211, nmsa=?) ...
+  Baseline pLDDT: 89.15  (71.4s)
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[5] Q98576 (len=146, nmsa=?) ...
+  Baseline pLDDT: 46.27  (70.6s)
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[6] Q9J546 (len=156, nmsa=?) ...
+  Baseline pLDDT: 93.86  (65.3s)
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[7] G1JWD3 (len=232, nmsa=?) ...
+  Baseline pLDDT: 90.80  (69.0s)
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[8] Q6EDX8 (len=340, nmsa=?) ...
+  Baseline pLDDT: 81.79  (78.9s)
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[9] A0A059PY42 (len=380, nmsa=?) ...
+  Baseline pLDDT: 54.21  (83.0s)
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[10] A0A2K8I3N9 (len=321, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 429 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[11] A0A0B4VFQ3 (len=241, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 5 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[12] A4PE30 (len=339, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 12 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[13] P22955 (len=339, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 8 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 21 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[14] P0C799 (len=201, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 21 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[15] P05461 (len=244, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 11 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: INTERNAL: Failed to allocate 12582912 bytes for new constant
+
+[16] O48504 (len=72, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 8 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 422 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[17] Q2LMB7 (len=76, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 310 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 428 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[18] A0AA82WNZ9 (len=241, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 12 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 21 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[19] Q84629 (len=80, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 312 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 429 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[20] P68930 (len=293, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 414 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 431 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[21] A0A0B4N235 (len=267, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 5 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 5 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[22] Q8LTE3 (len=404, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 390 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: Failed to get module function:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[23] A0A3T0IGR7 (len=187, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 21 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 21 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[24] Q00844 (len=178, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 10 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 12 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[25] Q5YFK6 (len=146, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 10 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 8 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[26] K7WK08 (len=466, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 7 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 12 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[27] B5SNS2 (len=348, nmsa=?) ...
+  Baseline failed: RESOURCE_EXHAUSTED: CUDA driver ran out of memory trying to instantiate CUDA graph with 21 nodes and 0 conditionals (total of 0 alive CUDA graphs in the process). You can try to (a) Give more memory to CUDA driver by reducing XLA_PYTHON_CLIENT_MEM_FRACTION (b) Disable CUDA graph with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set). Original error: Failed to instantiate CUDA graph:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+  TTT failed: RESOURCE_EXHAUSTED: Failed to get module function:CUDA_ERROR_OUT_OF_MEMORY: out of memory
+
+[28] A7XXS2 (len=348, nmsa=?) ...
