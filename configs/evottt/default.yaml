@@ -26,6 +26,7 @@ eval_interval: 1  # evaluate pLDDT every N TTT steps (0 to disable)
 # data_dir: /scratch/project/open-35-8/pimenol1/af2_data
 msa_dir: /scratch/project/open-35-8/data/bfvd/bfvd_beta/input/logan
 benchmark_csv: /scratch/project/open-35-8/data/bfvd/bfvd_beta/sample_100_proteins.csv
+output_dir: /scratch/project/open-35-8/pimenol1/alphafold/evottt_outputs
 
 # Subset selection (all optional)
 protein_ids: "A0A1W6I162, Q98576, A0A059PY42"

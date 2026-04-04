@@ -26,14 +26,14 @@ import logging
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import jax
 import numpy as np
 
 print(f'[init] jax/numpy imported, jax.devices={jax.devices()}', flush=True)
 
-from alphafold.common import confidence, residue_constants
+from alphafold.common import confidence, protein, residue_constants
 from alphafold.data import parsers, pipeline
 from alphafold.model import config as af_config
 from alphafold.model import data as af_data
@@ -105,6 +105,29 @@ def compute_mean_plddt(prediction_result: Dict[str, Any]) -> float:
         prediction_result['predicted_lddt']['logits']
     )
     return float(np.mean(plddt))
+
+
+def save_prediction_pdb(
+    prediction_result: Dict[str, Any],
+    features: Dict[str, np.ndarray],
+    pdb_path: str,
+) -> None:
+    """Build a Protein from prediction result and write it as PDB."""
+    plddt = confidence.compute_plddt(
+        prediction_result['predicted_lddt']['logits']
+    )
+    plddt_b_factors = np.repeat(
+        plddt[:, None], residue_constants.atom_type_num, axis=-1
+    )
+    prot = protein.from_prediction(
+        features=features,
+        result=prediction_result,
+        b_factors=plddt_b_factors,
+        remove_leading_feature_dimension=True,
+    )
+    Path(pdb_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(pdb_path, 'w') as f:
+        f.write(protein.to_pdb(prot))
 
 
 # ---------------------------------------------------------------------------
@@ -323,6 +346,10 @@ def main() -> int:
                 baseline_time = time.time() - t0
                 baseline_plddt = compute_mean_plddt(baseline_result)
                 print(f'  Baseline pLDDT: {baseline_plddt:.2f}  ({baseline_time:.1f}s)')
+                save_prediction_pdb(
+                    baseline_result, baseline_features,
+                    str(protein_dir / 'baseline.pdb'),
+                )
             except Exception as e:
                 print(f'  Baseline failed: {e}')
                 # Use CSV pLDDT if available, keep going with TTT
@@ -338,8 +365,9 @@ def main() -> int:
                 random_seed=args.seed,
             )
 
-            # Build per-step pLDDT eval function
+            # Build per-step pLDDT eval function that also saves PDBs
             eval_fn = None
+            eval_pdb_paths: List[str] = []  # one path per eval_fn call
             if eval_runner is not None:
                 eval_features = load_features_from_a3m(
                     str(a3m_path), seq, pid, eval_config,
@@ -348,6 +376,8 @@ def main() -> int:
                 _runner = eval_runner
                 _feat = eval_features
                 _seed = args.seed
+                _pdb_dir = protein_dir / 'steps'
+                _pdb_list = eval_pdb_paths
                 def eval_fn(adapted_params):
                     result = _runner.apply(
                         adapted_params,
@@ -358,7 +388,13 @@ def main() -> int:
                     plddt = confidence.compute_plddt(
                         result['predicted_lddt']['logits']
                     )
-                    return {'plddt': float(np.mean(plddt))}
+                    mean_plddt = float(np.mean(plddt))
+                    # Save PDB for this evaluation step
+                    call_idx = len(_pdb_list)
+                    pdb_path = str(_pdb_dir / f'eval_{call_idx:04d}.pdb')
+                    save_prediction_pdb(result, _feat, pdb_path)
+                    _pdb_list.append(pdb_path)
+                    return {'plddt': mean_plddt}
 
             t0 = time.time()
             adapted_params, ttt_losses, eval_logs, best_step = run_ttt(
@@ -404,6 +440,10 @@ def main() -> int:
             print(f'  Adapted pLDDT: {adapted_plddt:.2f}  ({adapted_time:.1f}s)')
             if baseline_plddt is not None:
                 print(f'  Δ pLDDT: {adapted_plddt - baseline_plddt:+.2f}')
+            save_prediction_pdb(
+                adapted_result, adapted_features,
+                str(protein_dir / 'adapted.pdb'),
+            )
         except Exception as e:
             print(f'  Adapted prediction failed: {e}')
             continue
@@ -434,6 +474,21 @@ def main() -> int:
         protein_dir.mkdir(parents=True, exist_ok=True)
         with open(result_path, 'w') as f:
             json.dump(result, f, indent=2)
+
+        # ---- per-step CSV log ----------------------------------------------
+        # Columns: step_num, loss, plddt, pdb
+        # eval_logs and eval_pdb_paths are aligned (one entry per eval call).
+        log_csv_path = protein_dir / 'ttt_log.csv'
+        with open(log_csv_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['step_num', 'loss', 'plddt', 'pdb'])
+            for log_entry, pdb_path in zip(eval_logs, eval_pdb_paths):
+                writer.writerow([
+                    log_entry['step'],
+                    log_entry['loss'],
+                    log_entry['plddt'],
+                    pdb_path,
+                ])
 
     # ---- summary -----------------------------------------------------------
     if results:
