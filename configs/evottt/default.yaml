@@ -13,14 +13,18 @@ slurm:
 model_name: model_1_ptm
 
 # TTT hyperparameters
-ttt_steps: 20
-ttt_lr: 3.0e-4
-lora_rank: 8
-last_n_blocks: 8
-lora_alpha: 16
+ttt_steps: 100
+ttt_lr: 5e-4
+lora_rank: 4
+last_n_blocks: 48
+lora_alpha: 8
 
 mask_fraction: 0.15
+ttt_msa_clusters: 32  # subsample this many MSA rows per TTT step (null = use all)
+ttt_crop_size: 1024  # crop residues during TTT (null = no crop, e.g. 256)
 eval_interval: 1  # evaluate pLDDT every N TTT steps (0 to disable)
+max_msa_clusters: 4
+max_extra_msa: 0
 
 # Data paths (defaults match run_evottt.sh)
 # data_dir: /scratch/project/open-35-8/pimenol1/af2_data

@@ -217,6 +217,13 @@ def main() -> int:
     parser.add_argument('--lora_alpha', type=float, default=1.0)
 
     parser.add_argument('--mask_fraction', type=float, default=0.15)
+    parser.add_argument('--ttt_msa_clusters', type=int, default=None,
+                        help='Subsample this many MSA rows per TTT step. '
+                             'Each step gets a different random subset from '
+                             'the full MSA pool. None = use all.')
+    parser.add_argument('--ttt_crop_size', type=int, default=None,
+                        help='Crop residues to this size during TTT steps. '
+                             'Proteins shorter than this are not cropped.')
     parser.add_argument('--eval_interval', type=int, default=1,
                         help='Evaluate pLDDT every N TTT steps (0 to disable).')
     # MSA generation (used when precomputed A3M is missing)
@@ -263,21 +270,33 @@ def main() -> int:
     # ---- setup model --------------------------------------------------------
     print(f'Model: {args.model_name}')
     print(f'TTT: steps={args.ttt_steps} lr={args.ttt_lr} rank={args.lora_rank} '
-          f'blocks={args.last_n_blocks} alpha={args.lora_alpha}')
+          f'blocks={args.last_n_blocks} alpha={args.lora_alpha} '
+          f'crop={args.ttt_crop_size or "none"}')
 
     baseline_config = af_config.model_config(args.model_name)
     base_params = af_data.get_model_haiku_params(
         args.model_name, str(args.data_dir)
     )
 
-    # TTT config: no recycling, reduced MSA for memory
+    # TTT config: no recycling, aggressively reduced MSA, per-block remat
     ttt_config = af_config.model_config(args.model_name)
     with ttt_config.unlocked():
         ttt_config.model.num_recycle = 0
         ttt_config.data.common.num_recycle = 0
-        # Reduce MSA size so gradient computation fits in GPU memory
-        ttt_config.data.eval.max_msa_clusters = 128
-        ttt_config.data.common.max_extra_msa = 1024
+        # MSA pool size for TTT. When subsampling per step, keep a large
+        # pool so each step sees different sequences; otherwise use a small
+        # fixed set for memory efficiency.
+        if args.ttt_msa_clusters is not None:
+            # Large pool; per-step subsampling in run_ttt handles the rest
+            ttt_config.data.eval.max_msa_clusters = 512
+        else:
+            ttt_config.data.eval.max_msa_clusters = 32
+        ttt_config.data.common.max_extra_msa = 128
+        # Enable per-block gradient checkpointing (remat) inside Evoformer
+        ttt_config.model.global_config.use_remat = True
+        # Crop residues during TTT to cap quadratic attention cost
+        if args.ttt_crop_size is not None:
+            ttt_config.data.eval.crop_size = args.ttt_crop_size
 
     ttt_apply = make_ttt_apply(ttt_config.model)
 
@@ -409,6 +428,7 @@ def main() -> int:
                 alpha=args.lora_alpha,
 
                 replace_fraction=args.mask_fraction,
+                msa_sample_size=args.ttt_msa_clusters,
                 seed=args.seed,
                 eval_fn=eval_fn,
                 eval_interval=args.eval_interval,

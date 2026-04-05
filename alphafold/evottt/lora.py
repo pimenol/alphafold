@@ -6,7 +6,6 @@ Provides functions to:
 - Merge LoRA deltas into base params for forward passes
 """
 
-import copy
 from typing import Any, Dict, List, Optional, Tuple
 
 import jax

@@ -74,6 +74,48 @@ def make_ttt_apply(model_config):
 # MSA re-masking in JAX
 # ---------------------------------------------------------------------------
 
+def subsample_msa_jax(
+    batch: Dict[str, Any],
+    rng: jnp.ndarray,
+    n_sample: int,
+) -> Dict[str, Any]:
+    """Randomly subsample MSA rows, always keeping the query (row 0).
+
+    Args:
+        batch: Feature dict with squeezed shapes (no ensemble dim).
+            Must contain ``'true_msa'`` with shape ``(N_seq, N_res)``.
+        rng: JAX PRNG key.
+        n_sample: Total number of MSA rows in the output (including query).
+
+    Returns:
+        Shallow-copied batch with MSA arrays subsampled to ``n_sample`` rows.
+    """
+    batch = dict(batch)
+    n_seq = batch['true_msa'].shape[0]
+
+    # If we already have fewer rows than requested, return as-is
+    if n_seq <= n_sample:
+        return batch
+
+    # Sample (n_sample - 1) indices from rows 1..N_seq-1, prepend row 0
+    other_idx = jax.random.choice(rng, n_seq - 1, shape=(n_sample - 1,),
+                                  replace=False) + 1
+    idx = jnp.concatenate([jnp.array([0]), other_idx])
+
+    # Keys with the MSA sequence dimension (axis 0)
+    msa_keys = {'true_msa', 'msa_feat', 'msa_mask', 'bert_mask'}
+    row_keys = {'msa_row_mask'}
+
+    for k in msa_keys:
+        if k in batch:
+            batch[k] = batch[k][idx]
+    for k in row_keys:
+        if k in batch:
+            batch[k] = batch[k][idx]
+
+    return batch
+
+
 def remask_msa_jax(
     batch: Dict[str, Any],
     rng: jnp.ndarray,
@@ -226,6 +268,7 @@ def run_ttt(
     alpha: float = 1.0,
 
     replace_fraction: float = 0.15,
+    msa_sample_size: Optional[int] = None,
     seed: int = 0,
     targets: Optional[List[LoRATarget]] = None,
     eval_fn: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
@@ -247,6 +290,9 @@ def run_ttt(
         alpha: LoRA scaling factor.
 
         replace_fraction: MSA masking fraction per step.
+        msa_sample_size: If set, randomly subsample this many MSA rows
+            (from the full pool) at each TTT step. Gives each step a
+            different MSA subset, reducing overfitting. *None* = use all.
         seed: Random seed.
         targets: LoRA targets.  If *None*, auto-discovered.
 
@@ -293,7 +339,11 @@ def run_ttt(
     # --- 4. JIT-compiled step ------------------------------------------------
     @jax.jit
     def step(trainable, opt_state, batch_sq, rng):
-        rng, mask_rng, fwd_rng = jax.random.split(rng, 3)
+        rng, sample_rng, mask_rng, fwd_rng = jax.random.split(rng, 4)
+
+        # Optionally subsample MSA rows so each step sees different sequences
+        if msa_sample_size is not None:
+            batch_sq = subsample_msa_jax(batch_sq, sample_rng, msa_sample_size)
 
         masked_batch = remask_msa_jax(
             batch_sq, mask_rng, replace_fraction=replace_fraction,

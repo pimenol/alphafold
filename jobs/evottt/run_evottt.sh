@@ -55,16 +55,24 @@ cfg = yaml.safe_load(open('${CONFIG_FILE}'))
 mapping = {
     'ttt_steps': 'TTT_STEPS', 'ttt_lr': 'TTT_LR', 'lora_rank': 'LORA_RANK',
     'last_n_blocks': 'LAST_N_BLOCKS', 'lora_alpha': 'LORA_ALPHA',
-    'mask_fraction': 'MASK_FRACTION',
+    'mask_fraction': 'MASK_FRACTION', 'ttt_msa_clusters': 'TTT_MSA_CLUSTERS',
+    'ttt_crop_size': 'TTT_CROP_SIZE',
     'eval_interval': 'EVAL_INTERVAL', 'msa_dir': 'MSA_DIR',
     'benchmark_csv': 'BENCHMARK_CSV', 'data_dir': 'DATA_DIR',
     'output_dir': 'OUTPUT_DIR', 'model_name': 'MODEL_NAME',
     'start_idx': 'START_IDX', 'end_idx': 'END_IDX',
     'protein_ids': 'PROTEIN_IDS', 'seed': 'SEED',
 }
+bool_mapping = {
+    'skip_existing': 'SKIP_EXISTING',
+    'skip_baseline': 'SKIP_BASELINE',
+}
 for key, env in mapping.items():
     if key in cfg and cfg[key] is not None:
         print(f'{env}=\"\${{{env}:-{cfg[key]}}}\"')
+for key, env in bool_mapping.items():
+    if cfg.get(key):
+        print(f'{env}=true')
 ")"
 
 # ---- Fallback defaults (if not in YAML) ----
@@ -79,6 +87,8 @@ LAST_N_BLOCKS="${LAST_N_BLOCKS:-8}"
 LORA_ALPHA="${LORA_ALPHA:-1.0}"
 
 MASK_FRACTION="${MASK_FRACTION:-0.15}"
+TTT_MSA_CLUSTERS="${TTT_MSA_CLUSTERS:-}"
+TTT_CROP_SIZE="${TTT_CROP_SIZE:-}"
 EVAL_INTERVAL="${EVAL_INTERVAL:-1}"
 MODEL_NAME="${MODEL_NAME:-model_1_ptm}"
 SEED="${SEED:-0}"
@@ -91,11 +101,15 @@ JACKHMMER_BIN="${JACKHMMER_BIN:-}"
 SEQ_DATABASE="${SEQ_DATABASE:-}"
 MSA_N_CPU="${MSA_N_CPU:-8}"
 
+# ---- Per-run output subdirectory ----
+RUN_TAG="lr${TTT_LR}_r${LORA_RANK}_b${LAST_N_BLOCKS}_a${LORA_ALPHA}_s${TTT_STEPS}"
+OUTPUT_DIR="${OUTPUT_DIR}/${RUN_TAG}_${SLURM_JOB_ID:-local}"
+
 echo "============================================"
 echo "EvoTTT benchmark run"
 echo "Job ID: ${SLURM_JOB_ID}"
 echo "Node: $(hostname)"
-echo "TTT: steps=${TTT_STEPS} lr=${TTT_LR} rank=${LORA_RANK} blocks=${LAST_N_BLOCKS} alpha=${LORA_ALPHA}"
+echo "TTT: steps=${TTT_STEPS} lr=${TTT_LR} rank=${LORA_RANK} blocks=${LAST_N_BLOCKS} alpha=${LORA_ALPHA} crop=${TTT_CROP_SIZE:-none}"
 echo "Python: $(which python3) ($(python3 --version 2>&1))"
 echo "============================================"
 
@@ -116,8 +130,23 @@ CMD=(
   --eval_interval "${EVAL_INTERVAL}"
   --seed "${SEED}"
   --start_idx "${START_IDX}"
-  --skip_existing
 )
+
+if [[ "${SKIP_EXISTING:-}" == "true" ]]; then
+  CMD+=(--skip_existing)
+fi
+
+if [[ "${SKIP_BASELINE:-}" == "true" ]]; then
+  CMD+=(--skip_baseline)
+fi
+
+if [[ -n "${TTT_MSA_CLUSTERS}" ]]; then
+  CMD+=(--ttt_msa_clusters "${TTT_MSA_CLUSTERS}")
+fi
+
+if [[ -n "${TTT_CROP_SIZE}" ]]; then
+  CMD+=(--ttt_crop_size "${TTT_CROP_SIZE}")
+fi
 
 if [[ -n "${END_IDX}" ]]; then
   CMD+=(--end_idx "${END_IDX}")

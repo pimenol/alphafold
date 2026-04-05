@@ -40,6 +40,8 @@ HPARAM_ENV = {
     'lora_alpha':     'LORA_ALPHA',
 
     'mask_fraction':  'MASK_FRACTION',
+    'ttt_msa_clusters': 'TTT_MSA_CLUSTERS',
+    'ttt_crop_size':  'TTT_CROP_SIZE',
     'start_idx':      'START_IDX',
     'end_idx':        'END_IDX',
     'protein_ids':    'PROTEIN_IDS',
@@ -53,7 +55,6 @@ HPARAM_ENV = {
 EXTRA_CLI = {
     'model_name':     '--model_name',
     'seed':           '--seed',
-    'mask_fraction':  '--mask_fraction',
 }
 
 SLURM_DEFAULTS = {
@@ -192,6 +193,8 @@ def run_local(cfg: dict) -> None:
         'lora_alpha': '--lora_alpha',
 
         'mask_fraction': '--mask_fraction',
+        'ttt_msa_clusters': '--ttt_msa_clusters',
+        'ttt_crop_size': '--ttt_crop_size',
         'eval_interval': '--eval_interval',
         'seed': '--seed',
         'start_idx': '--start_idx',

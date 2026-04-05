@@ -1,0 +1,27 @@
+Codemap Analysis Report — 2026-04-05
+=====================================
+
+Status: INITIAL GENERATION (no previous codemaps existed)
+
+Files generated:
+  - docs/CODEMAPS/architecture.md  (system diagram, directory layout, design patterns)
+  - docs/CODEMAPS/backend.md       (EvoTTT core logic, AF2 model, feature pipeline)
+  - docs/CODEMAPS/data.md          (data flow, input/output formats, config schema)
+  - docs/CODEMAPS/dependencies.md  (ML stack, external tools, internal dep graph)
+
+Skipped (not applicable):
+  - frontend.md  (no frontend — this is a scientific computing project)
+
+Project summary:
+  - 96 Python source files
+  - AlphaFold2 fork + EvoTTT extension (LoRA-based test-time training)
+  - Key custom code: alphafold/evottt/ (609 lines), scripts/ (~1000 lines)
+  - Infrastructure: SLURM job scripts, YAML configs, conda environment
+
+Architecture highlights:
+  - EvoTTT adapts Evoformer attention weights via LoRA at inference time
+  - Uses masked-language-modeling on input MSA (no ground-truth structure needed)
+  - JAX + Haiku + Optax stack; TensorFlow used only for feature pipeline
+  - Gradient checkpointing (jax.checkpoint) for memory efficiency
+
+No staleness warnings (first generation).
