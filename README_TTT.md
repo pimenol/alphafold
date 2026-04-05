@@ -116,7 +116,7 @@ TTT_STEPS=100 TTT_LR=5e-5 LORA_RANK=8 PROTEIN_IDS=A0A6J5N0Y1,A5A3S1 \
 | `lora_rank` | 4 | LoRA rank (r) |
 | `last_n_blocks` | 8 | Number of Evoformer blocks to adapt (from end) |
 | `lora_alpha` | 1.0 | LoRA scaling factor |
-| `grad_clip` | 1.0 | Gradient clipping norm |
+
 | `mask_fraction` | 0.15 | MSA masking fraction per step |
 | `eval_interval` | 1 | Evaluate pLDDT every N TTT steps (0 to disable) |
 

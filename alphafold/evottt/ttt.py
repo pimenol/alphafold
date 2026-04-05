@@ -224,7 +224,7 @@ def run_ttt(
     rank: int = 4,
     last_n_blocks: int = 8,
     alpha: float = 1.0,
-    grad_clip_norm: float = 1.0,
+
     replace_fraction: float = 0.15,
     seed: int = 0,
     targets: Optional[List[LoRATarget]] = None,
@@ -245,7 +245,7 @@ def run_ttt(
         rank: LoRA rank.
         last_n_blocks: How many trailing Evoformer blocks to adapt.
         alpha: LoRA scaling factor.
-        grad_clip_norm: Maximum gradient global norm.
+
         replace_fraction: MSA masking fraction per step.
         seed: Random seed.
         targets: LoRA targets.  If *None*, auto-discovered.
@@ -287,10 +287,7 @@ def run_ttt(
         decay_steps=num_steps,
         end_value=learning_rate * 0.01,
     )
-    optimizer = optax.chain(
-        optax.clip_by_global_norm(grad_clip_norm),
-        optax.adam(schedule),
-    )
+    optimizer = optax.adam(schedule)
     opt_state = optimizer.init(trainable)
 
     # --- 4. JIT-compiled step ------------------------------------------------

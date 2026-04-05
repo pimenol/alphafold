@@ -215,7 +215,7 @@ def main() -> int:
     parser.add_argument('--lora_rank', type=int, default=4)
     parser.add_argument('--last_n_blocks', type=int, default=8)
     parser.add_argument('--lora_alpha', type=float, default=1.0)
-    parser.add_argument('--grad_clip', type=float, default=1.0)
+
     parser.add_argument('--mask_fraction', type=float, default=0.15)
     parser.add_argument('--eval_interval', type=int, default=1,
                         help='Evaluate pLDDT every N TTT steps (0 to disable).')
@@ -407,7 +407,7 @@ def main() -> int:
                 rank=args.lora_rank,
                 last_n_blocks=args.last_n_blocks,
                 alpha=args.lora_alpha,
-                grad_clip_norm=args.grad_clip,
+
                 replace_fraction=args.mask_fraction,
                 seed=args.seed,
                 eval_fn=eval_fn,

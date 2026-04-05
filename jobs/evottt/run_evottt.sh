@@ -55,7 +55,7 @@ cfg = yaml.safe_load(open('${CONFIG_FILE}'))
 mapping = {
     'ttt_steps': 'TTT_STEPS', 'ttt_lr': 'TTT_LR', 'lora_rank': 'LORA_RANK',
     'last_n_blocks': 'LAST_N_BLOCKS', 'lora_alpha': 'LORA_ALPHA',
-    'grad_clip': 'GRAD_CLIP', 'mask_fraction': 'MASK_FRACTION',
+    'mask_fraction': 'MASK_FRACTION',
     'eval_interval': 'EVAL_INTERVAL', 'msa_dir': 'MSA_DIR',
     'benchmark_csv': 'BENCHMARK_CSV', 'data_dir': 'DATA_DIR',
     'output_dir': 'OUTPUT_DIR', 'model_name': 'MODEL_NAME',
@@ -77,7 +77,7 @@ TTT_LR="${TTT_LR:-3e-4}"
 LORA_RANK="${LORA_RANK:-4}"
 LAST_N_BLOCKS="${LAST_N_BLOCKS:-8}"
 LORA_ALPHA="${LORA_ALPHA:-1.0}"
-GRAD_CLIP="${GRAD_CLIP:-1.0}"
+
 MASK_FRACTION="${MASK_FRACTION:-0.15}"
 EVAL_INTERVAL="${EVAL_INTERVAL:-1}"
 MODEL_NAME="${MODEL_NAME:-model_1_ptm}"
@@ -111,7 +111,7 @@ CMD=(
   --lora_rank "${LORA_RANK}"
   --last_n_blocks "${LAST_N_BLOCKS}"
   --lora_alpha "${LORA_ALPHA}"
-  --grad_clip "${GRAD_CLIP}"
+
   --mask_fraction "${MASK_FRACTION}"
   --eval_interval "${EVAL_INTERVAL}"
   --seed "${SEED}"

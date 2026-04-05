@@ -38,7 +38,7 @@ HPARAM_ENV = {
     'lora_rank':      'LORA_RANK',
     'last_n_blocks':  'LAST_N_BLOCKS',
     'lora_alpha':     'LORA_ALPHA',
-    'grad_clip':      'GRAD_CLIP',
+
     'mask_fraction':  'MASK_FRACTION',
     'start_idx':      'START_IDX',
     'end_idx':        'END_IDX',
@@ -54,7 +54,6 @@ EXTRA_CLI = {
     'model_name':     '--model_name',
     'seed':           '--seed',
     'mask_fraction':  '--mask_fraction',
-    'grad_clip':      '--grad_clip',
 }
 
 SLURM_DEFAULTS = {
@@ -191,7 +190,7 @@ def run_local(cfg: dict) -> None:
         'lora_rank': '--lora_rank',
         'last_n_blocks': '--last_n_blocks',
         'lora_alpha': '--lora_alpha',
-        'grad_clip': '--grad_clip',
+
         'mask_fraction': '--mask_fraction',
         'eval_interval': '--eval_interval',
         'seed': '--seed',

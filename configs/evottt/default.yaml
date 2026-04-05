@@ -18,18 +18,18 @@ ttt_lr: 3.0e-4
 lora_rank: 8
 last_n_blocks: 8
 lora_alpha: 16
-grad_clip: 1.0
+
 mask_fraction: 0.15
 eval_interval: 1  # evaluate pLDDT every N TTT steps (0 to disable)
 
 # Data paths (defaults match run_evottt.sh)
 # data_dir: /scratch/project/open-35-8/pimenol1/af2_data
 msa_dir: /scratch/project/open-35-8/data/bfvd/bfvd_beta/input/logan
-benchmark_csv: /scratch/project/open-35-8/data/bfvd/bfvd_beta/sample_100_proteins.csv
+benchmark_csv: /scratch/project/open-35-8/pimenol1/alphafold/data/bfvd/summary.csv
 output_dir: /scratch/project/open-35-8/pimenol1/alphafold/evottt_outputs
 
 # Subset selection (all optional)
-protein_ids: "A0A1W6I162, Q98576, A0A059PY42"
+# protein_ids: "A0A1W6I162, Q98576, A0A059PY42"
 # start_idx: 0
 # end_idx: 10
 seed: 0

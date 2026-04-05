@@ -1,0 +1,28 @@
+Loading defaults from: /scratch/project/open-35-8/pimenol1/alphafold/configs/evottt/default.yaml
+============================================
+EvoTTT benchmark run
+Job ID: 4114569
+Node: acn14.karolina.it4i.cz
+TTT: steps=20 lr=0.0003 rank=8 blocks=8 alpha=16
+Python: /scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/bin/python3 (Python 3.11.15)
+============================================
+[init] jax/numpy imported, jax.devices=[cuda(id=0)]
+[init] all imports done
+usage: run_evottt_benchmark.py [-h] [--benchmark_csv BENCHMARK_CSV]
+                               [--msa_dir MSA_DIR] [--data_dir DATA_DIR]
+                               --output_dir OUTPUT_DIR
+                               [--model_name MODEL_NAME]
+                               [--ttt_steps TTT_STEPS] [--ttt_lr TTT_LR]
+                               [--lora_rank LORA_RANK]
+                               [--last_n_blocks LAST_N_BLOCKS]
+                               [--lora_alpha LORA_ALPHA]
+                               [--mask_fraction MASK_FRACTION]
+                               [--eval_interval EVAL_INTERVAL]
+                               [--jackhmmer_binary_path JACKHMMER_BINARY_PATH]
+                               [--seq_database_path SEQ_DATABASE_PATH]
+                               [--msa_n_cpu MSA_N_CPU] [--seed SEED]
+                               [--protein_ids PROTEIN_IDS]
+                               [--start_idx START_IDX] [--end_idx END_IDX]
+                               [--skip_existing] [--skip_baseline]
+run_evottt_benchmark.py: error: unrecognized arguments: --grad_clip 1.0
+Job finished.

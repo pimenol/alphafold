@@ -8,7 +8,7 @@ ttt_lr: 1.0e-4
 lora_rank: 4
 last_n_blocks: 8
 lora_alpha: 1.0
-grad_clip: 1.0
+
 mask_fraction: 0.15
 
 seed: 0
