@@ -1,4 +1,4 @@
-<!-- Generated: 2026-04-05 | Files scanned: 96 | Token estimate: ~500 -->
+<!-- Generated: 2026-04-06 | Files scanned: 110 | Token estimate: ~550 -->
 # Data Flow & Formats
 
 ## Input Data
@@ -47,12 +47,18 @@ Key feature shapes (for TTT):
 ## Experiment Configs (configs/evottt/*.yaml)
 ```yaml
 # Key hyperparameters
-ttt_steps: 20          # TTT optimization steps
-ttt_lr: 3.0e-4         # Learning rate
-lora_rank: 8           # LoRA rank
-last_n_blocks: 8       # Evoformer blocks to adapt
-lora_alpha: 16         # LoRA scaling factor
+ttt_steps: 30          # TTT optimization steps
+ttt_lr: 1e-3           # Learning rate
+lora_rank: 4           # LoRA rank
+last_n_blocks: 48      # Evoformer blocks to adapt
+lora_alpha: 8          # LoRA scaling factor
 mask_fraction: 0.15    # BERT-style mask ratio
 ttt_crop_size: 1024    # Max sequence length for TTT
+ttt_msa_clusters: 64   # MSA rows per TTT step (null = all)
 eval_interval: 1       # Evaluate pLDDT every N steps
+optimizer: "sgd"       # "adam" | "adamw" | "sgd"
+# Experiment flags
+lora_triangle_attention: false  # Exp 1: LoRA on pair attention
+grad_accum_steps: 1             # Exp 5: accumulate over N subsamples
+block_mask: true                # Exp 8: column-wise masking
 ```

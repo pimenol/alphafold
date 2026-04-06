@@ -375,6 +375,12 @@ class AlphaFold(hk.Module):
           [num_residues, num_residues, emb_config.pair_channel]
       )
 
+    # Allow external prev injection (e.g., frozen conditioning for TTT).
+    # Keys in batch override the zeros above; squeeze ensemble dim [0].
+    for pk in ('prev_pos', 'prev_msa_first_row', 'prev_pair'):
+      if pk in batch:
+        prev[pk] = jax.lax.stop_gradient(batch[pk][0])
+
     if self.config.num_recycle:
       if 'num_iter_recycling' in batch:
         # Training time: num_iter_recycling is in batch.

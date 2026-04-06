@@ -70,6 +70,61 @@ def make_ttt_apply(model_config):
     return jax.jit(transformed.apply)
 
 
+def compute_prev_features(
+    model_config,
+    base_params: Dict[str, Dict[str, Any]],
+    batch: Dict[str, Any],
+    seed: int = 0,
+) -> Dict[str, jnp.ndarray]:
+    """Run a full AF2 forward pass (with recycling) and extract prev features.
+
+    Returns a frozen ``prev`` dict with keys ``prev_pos``,
+    ``prev_msa_first_row``, ``prev_pair`` — the same conditioning that
+    recycling would produce.  These can be injected into TTT batches so
+    the Evoformer starts from a realistic geometric prior instead of zeros.
+
+    Args:
+        model_config: Full AF2 model config (``config.model``).
+        base_params: Frozen pre-trained AF2 params.
+        batch: Processed feature dict (with ensemble dim).
+        seed: Random seed for the forward pass.
+
+    Returns:
+        Dict with ``prev_pos``, ``prev_msa_first_row``, ``prev_pair``
+        (no ensemble dim, stop-gradiented).
+    """
+    cfg = copy.deepcopy(model_config)
+
+    def _forward(batch):
+        model = modules.AlphaFold(cfg)
+        return model(
+            batch,
+            is_training=False,
+            compute_loss=False,
+            ensemble_representations=True,
+            return_representations=True,
+        )
+
+    apply_fn = jax.jit(hk.transform(_forward).apply)
+    result = apply_fn(base_params, jax.random.PRNGKey(seed), batch)
+
+    prev = {
+        'prev_pos': jax.lax.stop_gradient(
+            result['structure_module']['final_atom_positions']),
+        'prev_msa_first_row': jax.lax.stop_gradient(
+            result['representations']['msa_first_row']),
+        'prev_pair': jax.lax.stop_gradient(
+            result['representations']['pair']),
+    }
+    logger.info(
+        'Computed prev features: prev_pos=%s, prev_msa_first_row=%s, '
+        'prev_pair=%s',
+        prev['prev_pos'].shape, prev['prev_msa_first_row'].shape,
+        prev['prev_pair'].shape,
+    )
+    return prev
+
+
 # ---------------------------------------------------------------------------
 # MSA re-masking in JAX
 # ---------------------------------------------------------------------------
@@ -286,6 +341,7 @@ def run_ttt(
     lora_triangle_attention: bool = False,
     grad_accum_steps: int = 1,
     block_mask: bool = False,
+    prev: Optional[Dict[str, jnp.ndarray]] = None,
 ) -> Tuple[Dict[str, Dict[str, Any]], List[float], List[Dict[str, Any]], int]:
     """Run test-time training and return adapted parameters.
 
@@ -328,6 +384,16 @@ def run_ttt(
     # --- 1. squeeze ensemble dim for TTT (expected shape: [N_seq, N_res]) ---
     # process_features adds a leading ensemble dim: (1, ...)
     batch_squeezed = jax.tree.map(lambda x: x[0] if x.ndim > 0 else x, batch)
+
+    # Inject frozen prev conditioning (from compute_prev_features).
+    # Keys are carried through remask/subsample untouched, then get ensemble
+    # dim re-added by x[None] before the forward pass.  modules.py picks
+    # them up in AlphaFold.__call__ and uses them instead of zeros.
+    if prev is not None:
+        for pk in ('prev_pos', 'prev_msa_first_row', 'prev_pair'):
+            if pk in prev:
+                batch_squeezed[pk] = prev[pk]
+        logger.info('Injecting frozen prev conditioning into TTT batch')
 
     # --- 2. init LoRA -------------------------------------------------------
     rng, init_rng = jax.random.split(rng)

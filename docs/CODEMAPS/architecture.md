@@ -1,4 +1,4 @@
-<!-- Generated: 2026-04-05 | Files scanned: 96 | Token estimate: ~900 -->
+<!-- Generated: 2026-04-06 | Files scanned: 110 | Token estimate: ~950 -->
 # Architecture
 
 ## Project Type
@@ -22,11 +22,12 @@ Baseline AF2 Prediction (optional)
     v
 TTT Adaptation Loop (JAX, no recycling)
     |--- For N steps:
-    |       remask_msa_jax (15% BERT-style) 
+    |       remask_msa_jax (15% BERT-style or block masking)
+    |       -> (optional) gradient accumulation over K MSA subsamples
     |       -> Evoformer forward (masked_msa head only)
     |       -> MLM loss (softmax_cross_entropy)
     |       -> Backward on LoRA A/B params (jax.checkpoint for memory)
-    |       -> Adam step (warmup + cosine decay)
+    |       -> Optimizer step: Adam | AdamW | SGD (warmup + cosine decay)
     |--- Merge best LoRA deltas into base params
     v
 Adapted AF2 Prediction (full model)
@@ -47,8 +48,8 @@ alphafold/                  # Core AlphaFold2 library (upstream)
   data/                     # Feature pipeline, MSA parsing, templates
     tools/                  # External tool wrappers (JackHMMER, HHblits, etc.)
   evottt/                   # *** EvoTTT extension ***
-    ttt.py                  # TTT loop, masking, loss (398 lines)
-    lora.py                 # LoRA init, merge, pytree mgmt (211 lines)
+    ttt.py                  # TTT loop, masking, loss (528 lines)
+    lora.py                 # LoRA init, merge, pytree mgmt (214 lines)
   model/                    # JAX model: modules, config, geometry
     tf/                     # TensorFlow data transforms
   relax/                    # Amber energy minimization
@@ -70,3 +71,6 @@ data/                       # MSA databases, benchmark CSVs
 - **JIT + Checkpoint**: `jax.checkpoint` recomputes Evoformer blocks to save GPU memory
 - **Config flow**: YAML -> Python -> shell env vars -> sbatch
 - **Per-step eval**: optional callback tracks best pLDDT during TTT loop
+- **Optimizer selection**: Adam / AdamW / SGD switchable via config
+- **Gradient accumulation**: unrolled at JIT trace time for multi-subsample averaging
+- **Block masking**: column-wise BERT masking forces pair representation to carry signal

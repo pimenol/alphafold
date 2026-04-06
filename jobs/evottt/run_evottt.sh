@@ -69,6 +69,7 @@ bool_mapping = {
     'skip_baseline': 'SKIP_BASELINE',
     'lora_triangle_attention': 'LORA_TRIANGLE_ATTENTION',
     'block_mask': 'BLOCK_MASK',
+    'ttt_recycle_prev': 'TTT_RECYCLE_PREV',
 }
 for key, env in mapping.items():
     if key in cfg and cfg[key] is not None:
@@ -102,6 +103,7 @@ OPTIMIZER="${OPTIMIZER:-adam}"
 GRAD_ACCUM_STEPS="${GRAD_ACCUM_STEPS:-1}"
 LORA_TRIANGLE_ATTENTION="${LORA_TRIANGLE_ATTENTION:-}"
 BLOCK_MASK="${BLOCK_MASK:-}"
+TTT_RECYCLE_PREV="${TTT_RECYCLE_PREV:-}"
 
 # ---- MSA generation (optional, for single-sequence input) ----
 JACKHMMER_BIN="${JACKHMMER_BIN:-}"
@@ -195,6 +197,10 @@ fi
 
 if [[ "${BLOCK_MASK:-}" == "true" ]]; then
   CMD+=(--block_mask)
+fi
+
+if [[ "${TTT_RECYCLE_PREV:-}" == "true" ]]; then
+  CMD+=(--ttt_recycle_prev)
 fi
 
 if [[ -n "${JACKHMMER_BIN}" && -n "${SEQ_DATABASE}" ]]; then

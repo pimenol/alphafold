@@ -1,27 +1,33 @@
-Codemap Analysis Report — 2026-04-05
+Codemap Analysis Report — 2026-04-06
 =====================================
 
-Status: INITIAL GENERATION (no previous codemaps existed)
+Status: INCREMENTAL UPDATE (previous scan: 2026-04-05)
 
-Files generated:
-  - docs/CODEMAPS/architecture.md  (system diagram, directory layout, design patterns)
-  - docs/CODEMAPS/backend.md       (EvoTTT core logic, AF2 model, feature pipeline)
-  - docs/CODEMAPS/data.md          (data flow, input/output formats, config schema)
-  - docs/CODEMAPS/dependencies.md  (ML stack, external tools, internal dep graph)
+Files updated:
+  - docs/CODEMAPS/architecture.md  (new design patterns, updated line counts)
+  - docs/CODEMAPS/backend.md       (new run_ttt params, block masking, optimizer selection)
+  - docs/CODEMAPS/data.md          (updated config schema with new experiment flags)
+  - docs/CODEMAPS/dependencies.md  (timestamp only)
 
-Skipped (not applicable):
-  - frontend.md  (no frontend — this is a scientific computing project)
+Changes since last scan (3 commits: 22cdf25..adec79a):
+  Modified:
+    - alphafold/evottt/ttt.py      (+130 lines: optimizer selection, grad accum, block masking)
+    - alphafold/evottt/lora.py     (+3 lines: triangle_attention parameter)
+    - configs/evottt/default.yaml  (new keys: optimizer, block_mask, lora_triangle_attention, grad_accum_steps)
+    - jobs/evottt/run_evottt.sh    (+47 lines: enhanced logging)
+    - scripts/run_evottt_benchmark.py (+18 lines: pass new config flags)
 
-Project summary:
-  - 96 Python source files
-  - AlphaFold2 fork + EvoTTT extension (LoRA-based test-time training)
-  - Key custom code: alphafold/evottt/ (609 lines), scripts/ (~1000 lines)
-  - Infrastructure: SLURM job scripts, YAML configs, conda environment
+New features detected:
+  - Optimizer selection: Adam / AdamW / SGD (configurable via YAML)
+  - Block masking (Exp 8): column-wise BERT masking on MSA
+  - Triangle attention LoRA (Exp 1): optional LoRA on pair-rep attention
+  - Gradient accumulation (Exp 5): average over K MSA subsamples per step
 
-Architecture highlights:
-  - EvoTTT adapts Evoformer attention weights via LoRA at inference time
-  - Uses masked-language-modeling on input MSA (no ground-truth structure needed)
-  - JAX + Haiku + Optax stack; TensorFlow used only for feature pipeline
-  - Gradient checkpointing (jax.checkpoint) for memory efficiency
+Architecture changes:
+  - run_ttt() gained 4 new parameters (optimizer_name, lora_triangle_attention,
+    grad_accum_steps, block_mask)
+  - Gradient accumulation loop unrolled at JIT trace time (static Python int)
+  - find_lora_targets() now accepts triangle_attention flag
 
-No staleness warnings (first generation).
+No new dependencies detected.
+No staleness warnings (all codemaps updated today).

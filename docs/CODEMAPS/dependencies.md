@@ -1,4 +1,4 @@
-<!-- Generated: 2026-04-05 | Files scanned: 96 | Token estimate: ~500 -->
+<!-- Generated: 2026-04-06 | Files scanned: 110 | Token estimate: ~500 -->
 # Dependencies
 
 ## Core ML Stack

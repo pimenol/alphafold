@@ -41,7 +41,7 @@ from alphafold.model import features as af_features
 from alphafold.model import model as af_model
 
 from alphafold.data.tools import jackhmmer as jackhmmer_tool
-from alphafold.evottt.ttt import make_ttt_apply, run_ttt
+from alphafold.evottt.ttt import compute_prev_features, make_ttt_apply, run_ttt
 print('[init] all imports done', flush=True)
 
 
@@ -228,6 +228,10 @@ def main() -> int:
     parser.add_argument('--block_mask', action='store_true',
                         help='Exp 8: mask entire residue columns across all '
                              'sequences instead of independent per-position masking.')
+    parser.add_argument('--ttt_recycle_prev', action='store_true',
+                        help='Run a full AF2 forward pass (with recycling) '
+                             'before TTT and use its representations as '
+                             'frozen prev conditioning for the Evoformer.')
     parser.add_argument('--mask_fraction', type=float, default=0.15)
     parser.add_argument('--ttt_msa_clusters', type=int, default=None,
                         help='Subsample this many MSA rows per TTT step. '
@@ -434,6 +438,16 @@ def main() -> int:
                     _pdb_list.append(pdb_path)
                     return {'plddt': mean_plddt}
 
+            # Optionally compute frozen prev conditioning from base model
+            prev = None
+            if args.ttt_recycle_prev:
+                t_prev = time.time()
+                prev = compute_prev_features(
+                    baseline_config.model, base_params, ttt_features,
+                    seed=args.seed,
+                )
+                print(f'  Computed prev features in {time.time() - t_prev:.1f}s')
+
             t0 = time.time()
             adapted_params, ttt_losses, eval_logs, best_step = run_ttt(
                 apply_fn=ttt_apply,
@@ -455,6 +469,7 @@ def main() -> int:
                 lora_triangle_attention=args.lora_triangle_attention,
                 grad_accum_steps=args.grad_accum_steps,
                 block_mask=args.block_mask,
+                prev=prev,
             )
             ttt_time = time.time() - t0
             best_info = f', best_step={best_step}' if best_step >= 0 else ''
