@@ -311,6 +311,13 @@ def main() -> int:
         eval_runner = af_model.RunModel(eval_config, params=base_params)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
+
+    config_path = args.output_dir / 'config.json'
+    config = {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()}
+    with open(config_path, 'w') as f:
+        json.dump(config, f, indent=2)
+    print(f'Config saved to {config_path}')
+
     results = []
 
     for i, row in enumerate(rows):

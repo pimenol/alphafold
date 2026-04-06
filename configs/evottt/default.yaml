@@ -19,7 +19,7 @@ lora_rank: 4
 last_n_blocks: 8
 lora_alpha: 8
 
-mask_fraction: 0.15
+mask_fraction: 0.20
 
 ttt_msa_clusters: 32  # subsample this many MSA rows per TTT step (null = use all)
 ttt_crop_size: 1024  
