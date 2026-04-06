@@ -14,14 +14,15 @@ model_name: model_1_ptm
 
 # TTT hyperparameters
 ttt_steps: 30
-ttt_lr: 1e-4
+ttt_lr: 1e-3
 lora_rank: 4
-last_n_blocks: 8
+last_n_blocks: 48
 lora_alpha: 8
+optimizer: "sgd"  # "adam" | "adamw" | "sgd"
 
-mask_fraction: 0.20
+mask_fraction: 0.15
 
-ttt_msa_clusters: 32  # subsample this many MSA rows per TTT step (null = use all)
+ttt_msa_clusters: 64  # subsample this many MSA rows per TTT step (null = use all)
 ttt_crop_size: 1024  
 eval_interval: 1 
 max_extra_msa: 0

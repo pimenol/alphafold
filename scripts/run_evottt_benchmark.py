@@ -216,6 +216,9 @@ def main() -> int:
     parser.add_argument('--last_n_blocks', type=int, default=8)
     parser.add_argument('--lora_alpha', type=float, default=1.0)
 
+    parser.add_argument('--optimizer', default='adam',
+                        choices=['adam', 'adamw', 'sgd'],
+                        help='Optimizer for TTT. sgd uses Nesterov momentum=0.9.')
     parser.add_argument('--mask_fraction', type=float, default=0.15)
     parser.add_argument('--ttt_msa_clusters', type=int, default=None,
                         help='Subsample this many MSA rows per TTT step. '
@@ -271,7 +274,7 @@ def main() -> int:
     print(f'Model: {args.model_name}')
     print(f'TTT: steps={args.ttt_steps} lr={args.ttt_lr} rank={args.lora_rank} '
           f'blocks={args.last_n_blocks} alpha={args.lora_alpha} '
-          f'crop={args.ttt_crop_size or "none"}')
+          f'optimizer={args.optimizer} crop={args.ttt_crop_size or "none"}')
 
     baseline_config = af_config.model_config(args.model_name)
     base_params = af_data.get_model_haiku_params(
@@ -439,6 +442,7 @@ def main() -> int:
                 seed=args.seed,
                 eval_fn=eval_fn,
                 eval_interval=args.eval_interval,
+                optimizer_name=args.optimizer,
             )
             ttt_time = time.time() - t0
             best_info = f', best_step={best_step}' if best_step >= 0 else ''

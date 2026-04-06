@@ -273,6 +273,7 @@ def run_ttt(
     targets: Optional[List[LoRATarget]] = None,
     eval_fn: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
     eval_interval: int = 1,
+    optimizer_name: str = 'adam',
 ) -> Tuple[Dict[str, Dict[str, Any]], List[float], List[Dict[str, Any]], int]:
     """Run test-time training and return adapted parameters.
 
@@ -333,7 +334,12 @@ def run_ttt(
         decay_steps=num_steps,
         end_value=learning_rate * 0.01,
     )
-    optimizer = optax.adam(schedule)
+    if optimizer_name == 'sgd':
+        optimizer = optax.sgd(schedule)
+    elif optimizer_name == 'adamw':
+        optimizer = optax.adamw(schedule, weight_decay=1e-3)
+    else:
+        optimizer = optax.adam(schedule)
     opt_state = optimizer.init(trainable)
 
     # --- 4. JIT-compiled step ------------------------------------------------
