@@ -20,12 +20,17 @@ last_n_blocks: 48
 lora_alpha: 8
 optimizer: "sgd"  # "adam" | "adamw" | "sgd"
 
-mask_fraction: 0.15
+mask_fraction: 0.3
 
 ttt_msa_clusters: 64  # subsample this many MSA rows per TTT step (null = use all)
-ttt_crop_size: 1024  
-eval_interval: 1 
+ttt_crop_size: 1024
+eval_interval: 1
 max_extra_msa: 0
+
+# Experiment flags
+lora_triangle_attention: false  # Exp 1: add LoRA to triangle (pair) attention
+grad_accum_steps: 1             # Exp 5: gradient accumulation over N MSA subsamples
+block_mask: false               # Exp 8: mask entire residue columns (column masking)
 
 # Data paths (defaults match run_evottt.sh)
 # data_dir: /scratch/project/open-35-8/pimenol1/af2_data

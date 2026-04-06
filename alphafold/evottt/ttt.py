@@ -123,6 +123,7 @@ def remask_msa_jax(
     uniform_prob: float = 0.1,
     profile_prob: float = 0.1,
     same_prob: float = 0.1,
+    block_mask: bool = False,
 ) -> Dict[str, Any]:
     """Re-mask the MSA in pure JAX, replicating ``make_masked_msa``.
 
@@ -138,6 +139,9 @@ def remask_msa_jax(
         replace_fraction: Fraction of MSA positions to mask.
         uniform_prob, profile_prob, same_prob: BERT replacement probs
             (remaining mass goes to the ``[MASK]`` token 22).
+        block_mask: If True, mask entire residue columns uniformly across all
+            sequences (Exp 8). Forces the pair representation to carry the
+            prediction signal rather than neighbouring MSA rows.
 
     Returns:
         Shallow-copied batch with updated ``'bert_mask'`` and ``'msa_feat'``.
@@ -149,7 +153,12 @@ def remask_msa_jax(
     rng_pos, rng_cat = jax.random.split(rng)
 
     # 1) Select positions to mask
-    mask_position = jax.random.uniform(rng_pos, (n_seq, n_res)) < replace_fraction
+    if block_mask:
+        # Mask entire residue columns — same mask broadcast across all sequences
+        mask_cols = jax.random.uniform(rng_pos, (n_res,)) < replace_fraction
+        mask_position = jnp.broadcast_to(mask_cols[None, :], (n_seq, n_res))
+    else:
+        mask_position = jax.random.uniform(rng_pos, (n_seq, n_res)) < replace_fraction
     batch['bert_mask'] = mask_position.astype(jnp.float32)
 
     # 2) Build categorical replacement distribution  (23 classes: 0-19 AA, 20 X, 21 gap, 22 MASK)
@@ -274,6 +283,9 @@ def run_ttt(
     eval_fn: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
     eval_interval: int = 1,
     optimizer_name: str = 'adam',
+    lora_triangle_attention: bool = False,
+    grad_accum_steps: int = 1,
+    block_mask: bool = False,
 ) -> Tuple[Dict[str, Dict[str, Any]], List[float], List[Dict[str, Any]], int]:
     """Run test-time training and return adapted parameters.
 
@@ -305,7 +317,8 @@ def run_ttt(
         the TTT step index that was selected (-1 if no eval).
     """
     if targets is None:
-        targets = find_lora_targets(base_params)
+        targets = find_lora_targets(base_params,
+                                    triangle_attention=lora_triangle_attention)
 
     rng = jax.random.PRNGKey(seed)
 
@@ -345,22 +358,8 @@ def run_ttt(
     # --- 4. JIT-compiled step ------------------------------------------------
     @jax.jit
     def step(trainable, opt_state, batch_sq, rng):
-        rng, sample_rng, mask_rng, fwd_rng = jax.random.split(rng, 4)
-
-        # Optionally subsample MSA rows so each step sees different sequences
-        if msa_sample_size is not None:
-            batch_sq = subsample_msa_jax(batch_sq, sample_rng, msa_sample_size)
-
-        masked_batch = remask_msa_jax(
-            batch_sq, mask_rng, replace_fraction=replace_fraction,
-        )
-        # Re-add ensemble dim expected by AlphaFold
-        masked_batch_e = jax.tree.map(lambda x: x[None], masked_batch)
-
         # jax.checkpoint avoids storing all intermediate activations
         # (48 Evoformer blocks) — recomputes them during backward instead.
-        # Capture non-traceable values (apply_fn, lora_meta, alpha, rank)
-        # as closures so JAX only traces trainable, batch, rng.
         @jax.checkpoint
         def _loss(trainable, batch, rng):
             return ttt_loss_fn(
@@ -368,9 +367,28 @@ def run_ttt(
                 apply_fn, num_output, batch, rng,
             )
 
-        loss, grads = jax.value_and_grad(_loss)(
-            trainable, masked_batch_e, fwd_rng,
-        )
+        def _single_grad(rng_k):
+            """Loss + grad for one MSA subsample/masking draw."""
+            rng_k, sample_rng, mask_rng, fwd_rng = jax.random.split(rng_k, 4)
+            b = subsample_msa_jax(batch_sq, sample_rng, msa_sample_size) \
+                if msa_sample_size is not None else batch_sq
+            masked = remask_msa_jax(b, mask_rng, replace_fraction=replace_fraction,
+                                    block_mask=block_mask)
+            masked_e = jax.tree.map(lambda x: x[None], masked)
+            return jax.value_and_grad(_loss)(trainable, masked_e, fwd_rng)
+
+        # Split one rng per accumulation sample; grad_accum_steps unrolled at
+        # trace time (static Python int captured from closure).
+        rng, *accum_rngs = jax.random.split(rng, grad_accum_steps + 1)
+        loss, grads = _single_grad(accum_rngs[0])
+        for k in range(1, grad_accum_steps):
+            l_k, g_k = _single_grad(accum_rngs[k])
+            loss = loss + l_k
+            grads = jax.tree.map(jnp.add, grads, g_k)
+        if grad_accum_steps > 1:
+            loss = loss / grad_accum_steps
+            grads = jax.tree.map(lambda g: g / grad_accum_steps, grads)
+
         updates, new_opt_state = optimizer.update(grads, opt_state, trainable)
         new_trainable = optax.apply_updates(trainable, updates)
         return new_trainable, new_opt_state, loss, rng

@@ -22,6 +22,7 @@ TARGET_PARAM_NAMES = ('query_w', 'key_w', 'value_w', 'output_w')
 def find_lora_targets(
     params: Dict[str, Dict[str, Any]],
     target_param_names: Tuple[str, ...] = TARGET_PARAM_NAMES,
+    triangle_attention: bool = False,
 ) -> List[LoRATarget]:
     """Discover LoRA targets by scanning the param tree.
 
@@ -32,6 +33,8 @@ def find_lora_targets(
     Args:
         params: Haiku param dict {scope: {name: array}}.
         target_param_names: Which param names to target.
+        triangle_attention: If True, also target triangle attention weights
+            (pair representation). Default False targets only MSA attention.
 
     Returns:
         List of (scope, param_name) tuples.
@@ -45,8 +48,8 @@ def find_lora_targets(
             continue
         if 'attention' not in scope:
             continue
-        # Only target MSA attention (row or column), not triangle attention
-        if 'triangle' in scope:
+        # Optionally include triangle attention (pair representation)
+        if 'triangle' in scope and not triangle_attention:
             continue
         for name in target_param_names:
             if name in params[scope]:

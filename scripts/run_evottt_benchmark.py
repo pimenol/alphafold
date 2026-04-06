@@ -218,7 +218,16 @@ def main() -> int:
 
     parser.add_argument('--optimizer', default='adam',
                         choices=['adam', 'adamw', 'sgd'],
-                        help='Optimizer for TTT. sgd uses Nesterov momentum=0.9.')
+                        help='Optimizer for TTT.')
+    parser.add_argument('--lora_triangle_attention', action='store_true',
+                        help='Exp 1: also apply LoRA to triangle attention '
+                             '(pair representation), not just MSA attention.')
+    parser.add_argument('--grad_accum_steps', type=int, default=1,
+                        help='Exp 5: accumulate gradients over this many MSA '
+                             'subsamples before each optimizer update.')
+    parser.add_argument('--block_mask', action='store_true',
+                        help='Exp 8: mask entire residue columns across all '
+                             'sequences instead of independent per-position masking.')
     parser.add_argument('--mask_fraction', type=float, default=0.15)
     parser.add_argument('--ttt_msa_clusters', type=int, default=None,
                         help='Subsample this many MSA rows per TTT step. '
@@ -443,6 +452,9 @@ def main() -> int:
                 eval_fn=eval_fn,
                 eval_interval=args.eval_interval,
                 optimizer_name=args.optimizer,
+                lora_triangle_attention=args.lora_triangle_attention,
+                grad_accum_steps=args.grad_accum_steps,
+                block_mask=args.block_mask,
             )
             ttt_time = time.time() - t0
             best_info = f', best_step={best_step}' if best_step >= 0 else ''

@@ -62,10 +62,13 @@ mapping = {
     'output_dir': 'OUTPUT_DIR', 'model_name': 'MODEL_NAME',
     'start_idx': 'START_IDX', 'end_idx': 'END_IDX',
     'protein_ids': 'PROTEIN_IDS', 'seed': 'SEED',
+    'optimizer': 'OPTIMIZER', 'grad_accum_steps': 'GRAD_ACCUM_STEPS',
 }
 bool_mapping = {
     'skip_existing': 'SKIP_EXISTING',
     'skip_baseline': 'SKIP_BASELINE',
+    'lora_triangle_attention': 'LORA_TRIANGLE_ATTENTION',
+    'block_mask': 'BLOCK_MASK',
 }
 for key, env in mapping.items():
     if key in cfg and cfg[key] is not None:
@@ -95,6 +98,10 @@ SEED="${SEED:-0}"
 START_IDX="${START_IDX:-0}"
 END_IDX="${END_IDX:-}"
 PROTEIN_IDS="${PROTEIN_IDS:-}"
+OPTIMIZER="${OPTIMIZER:-adam}"
+GRAD_ACCUM_STEPS="${GRAD_ACCUM_STEPS:-1}"
+LORA_TRIANGLE_ATTENTION="${LORA_TRIANGLE_ATTENTION:-}"
+BLOCK_MASK="${BLOCK_MASK:-}"
 
 # ---- MSA generation (optional, for single-sequence input) ----
 JACKHMMER_BIN="${JACKHMMER_BIN:-}"
@@ -130,6 +137,8 @@ CMD=(
   --eval_interval "${EVAL_INTERVAL}"
   --seed "${SEED}"
   --start_idx "${START_IDX}"
+  --optimizer "${OPTIMIZER}"
+  --grad_accum_steps "${GRAD_ACCUM_STEPS}"
 )
 
 if [[ "${SKIP_EXISTING:-}" == "true" ]]; then
@@ -154,6 +163,14 @@ fi
 
 if [[ -n "${PROTEIN_IDS}" ]]; then
   CMD+=(--protein_ids "${PROTEIN_IDS}")
+fi
+
+if [[ "${LORA_TRIANGLE_ATTENTION:-}" == "true" ]]; then
+  CMD+=(--lora_triangle_attention)
+fi
+
+if [[ "${BLOCK_MASK:-}" == "true" ]]; then
+  CMD+=(--block_mask)
 fi
 
 if [[ -n "${JACKHMMER_BIN}" && -n "${SEQ_DATABASE}" ]]; then
