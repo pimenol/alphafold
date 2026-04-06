@@ -13,17 +13,17 @@ slurm:
 model_name: model_1_ptm
 
 # TTT hyperparameters
-ttt_steps: 100
-ttt_lr: 5e-4
+ttt_steps: 30
+ttt_lr: 1e-4
 lora_rank: 4
-last_n_blocks: 48
+last_n_blocks: 8
 lora_alpha: 8
 
 mask_fraction: 0.15
+
 ttt_msa_clusters: 32  # subsample this many MSA rows per TTT step (null = use all)
-ttt_crop_size: 1024  # crop residues during TTT (null = no crop, e.g. 256)
-eval_interval: 1  # evaluate pLDDT every N TTT steps (0 to disable)
-max_msa_clusters: 4
+ttt_crop_size: 1024  
+eval_interval: 1 
 max_extra_msa: 0
 
 # Data paths (defaults match run_evottt.sh)
@@ -34,7 +34,7 @@ output_dir: /scratch/project/open-35-8/pimenol1/alphafold/evottt_outputs
 
 # Subset selection (all optional)
 # protein_ids: "A0A1W6I162, Q98576, A0A059PY42"
-# start_idx: 0
+# start_idx: 1
 # end_idx: 10
 seed: 0
 
