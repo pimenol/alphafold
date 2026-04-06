@@ -63,6 +63,7 @@ mapping = {
     'start_idx': 'START_IDX', 'end_idx': 'END_IDX',
     'protein_ids': 'PROTEIN_IDS', 'seed': 'SEED',
     'optimizer': 'OPTIMIZER', 'grad_accum_steps': 'GRAD_ACCUM_STEPS',
+    'lambda_pair': 'LAMBDA_PAIR',
 }
 bool_mapping = {
     'skip_existing': 'SKIP_EXISTING',
@@ -70,6 +71,7 @@ bool_mapping = {
     'lora_triangle_attention': 'LORA_TRIANGLE_ATTENTION',
     'block_mask': 'BLOCK_MASK',
     'ttt_recycle_prev': 'TTT_RECYCLE_PREV',
+    'distogram_consistency': 'DISTOGRAM_CONSISTENCY',
 }
 for key, env in mapping.items():
     if key in cfg and cfg[key] is not None:
@@ -104,6 +106,8 @@ GRAD_ACCUM_STEPS="${GRAD_ACCUM_STEPS:-1}"
 LORA_TRIANGLE_ATTENTION="${LORA_TRIANGLE_ATTENTION:-}"
 BLOCK_MASK="${BLOCK_MASK:-}"
 TTT_RECYCLE_PREV="${TTT_RECYCLE_PREV:-}"
+DISTOGRAM_CONSISTENCY="${DISTOGRAM_CONSISTENCY:-}"
+LAMBDA_PAIR="${LAMBDA_PAIR:-0.1}"
 
 # ---- MSA generation (optional, for single-sequence input) ----
 JACKHMMER_BIN="${JACKHMMER_BIN:-}"
@@ -136,6 +140,8 @@ echo "Optimizer:       ${OPTIMIZER}"
 echo "Mask fraction:   ${MASK_FRACTION}"
 echo "Block mask:      ${BLOCK_MASK:-false}"
 echo "Grad accum:      ${GRAD_ACCUM_STEPS}"
+echo "Distogram cons:  ${DISTOGRAM_CONSISTENCY:-false}"
+echo "Lambda pair:     ${LAMBDA_PAIR}"
 echo "LoRA tri attn:   ${LORA_TRIANGLE_ATTENTION:-false}"
 echo "MSA clusters:    ${TTT_MSA_CLUSTERS:-none}"
 echo "Crop size:       ${TTT_CROP_SIZE:-none}"
@@ -193,6 +199,10 @@ fi
 
 if [[ "${LORA_TRIANGLE_ATTENTION:-}" == "true" ]]; then
   CMD+=(--lora_triangle_attention)
+fi
+
+if [[ "${DISTOGRAM_CONSISTENCY:-}" == "true" ]]; then
+  CMD+=(--distogram_consistency --lambda_pair "${LAMBDA_PAIR}")
 fi
 
 if [[ "${BLOCK_MASK:-}" == "true" ]]; then

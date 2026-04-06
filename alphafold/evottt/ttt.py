@@ -36,25 +36,35 @@ from alphafold.evottt.lora import (
 # TTT forward function
 # ---------------------------------------------------------------------------
 
-def make_ttt_apply(model_config):
+def make_ttt_apply(model_config, distogram: bool = False):
     """Create a JIT-compiled apply function for TTT.
 
     Uses the real ``AlphaFold`` module (guaranteeing param-path compatibility)
     but with a modified config:
       - ``num_recycle = 0``  (single Evoformer pass, no recycling loop)
       - All head weights zeroed except ``masked_msa``
+        (and optionally ``distogram`` for consistency loss)
         → structure module is never instantiated (modules.py line 216-217)
+
+    Args:
+        model_config: AF2 model config (``config.model``).
+        distogram: If True, also keep the distogram head active so
+            its logits are available for the consistency loss.
 
     Returns:
         ``apply_fn(params, rng, batch) -> output_dict``
         where ``output_dict['masked_msa']['logits']`` has shape
         ``[N_seq, N_res, 23]``.
     """
+    keep_heads = {'masked_msa'}
+    if distogram:
+        keep_heads.add('distogram')
+
     cfg = copy.deepcopy(model_config)
     with cfg.unlocked():
         cfg.num_recycle = 0
         for head_name in list(cfg.heads.keys()):
-            if head_name != 'masked_msa':
+            if head_name not in keep_heads:
                 cfg.heads[head_name].weight = 0.0
 
     def _forward(batch):
@@ -316,6 +326,79 @@ def ttt_loss_fn(
     return loss
 
 
+def ttt_consistency_loss_fn(
+    trainable: Dict[str, Dict[str, jnp.ndarray]],
+    base_params: Dict[str, Dict[str, Any]],
+    lora_meta: Dict[str, Any],
+    alpha: float,
+    rank: int,
+    apply_fn,
+    num_output: int,
+    batch_1: Dict[str, Any],
+    batch_2: Dict[str, Any],
+    rng: jnp.ndarray,
+    lambda_pair: float,
+) -> jnp.ndarray:
+    """Masked-MSA loss + distogram consistency loss (symmetric KL).
+
+    Runs two forward passes with differently-masked batches, computes the
+    MLM loss on both, and adds a symmetric KL divergence between the two
+    distogram predictions.  This gives pair-level gradient signal without
+    needing ground-truth structures.
+
+    Args:
+        trainable: ``{key: {'A': array, 'B': array}}`` — the optimised vars.
+        base_params: Frozen base AF2 params.
+        lora_meta: Full lora dict (with shape metadata) from init_lora_params.
+        alpha: LoRA scaling factor.
+        rank: LoRA rank.
+        apply_fn: Haiku ``apply(params, rng, batch)`` from make_ttt_apply
+            (must have distogram head active).
+        num_output: Number of output classes for masked MSA head.
+        batch_1: First masked batch (with ensemble dim).
+        batch_2: Second masked batch (with ensemble dim).
+        rng: JAX PRNG key.
+        lambda_pair: Weight for the distogram consistency term.
+
+    Returns:
+        Scalar loss = 0.5*(mlm_1 + mlm_2) + lambda_pair * sym_KL.
+    """
+    lora = update_lora_from_trainable(lora_meta, trainable)
+    merged_params = merge_lora_into_params(base_params, lora, alpha, rank)
+
+    rng1, rng2 = jax.random.split(rng)
+    output_1 = apply_fn(merged_params, rng1, batch_1)
+    output_2 = apply_fn(merged_params, rng2, batch_2)
+
+    # --- MLM loss (average of both views) ---
+    def _mlm_loss(output, batch):
+        logits = output['masked_msa']['logits']
+        batch_sq = jax.tree.map(lambda x: x[0] if x.ndim > 0 else x, batch)
+        errors = softmax_cross_entropy(
+            labels=jax.nn.one_hot(batch_sq['true_msa'], num_classes=num_output),
+            logits=logits,
+        )
+        return jnp.sum(errors * batch_sq['bert_mask'], axis=(-2, -1)) / (
+            1e-8 + jnp.sum(batch_sq['bert_mask'], axis=(-2, -1))
+        )
+
+    mlm_loss = 0.5 * (_mlm_loss(output_1, batch_1) + _mlm_loss(output_2, batch_2))
+
+    # --- Distogram consistency (symmetric KL) ---
+    logits_1 = output_1['distogram']['logits']  # [N_res, N_res, N_bins]
+    logits_2 = output_2['distogram']['logits']
+    p = jax.nn.softmax(logits_1)
+    q = jax.nn.softmax(logits_2)
+    log_p = jax.nn.log_softmax(logits_1)
+    log_q = jax.nn.log_softmax(logits_2)
+
+    kl_pq = jnp.sum(p * (log_p - log_q), axis=-1)
+    kl_qp = jnp.sum(q * (log_q - log_p), axis=-1)
+    consistency_loss = 0.5 * jnp.mean(kl_pq + kl_qp)
+
+    return mlm_loss + lambda_pair * consistency_loss
+
+
 # ---------------------------------------------------------------------------
 # Main TTT training loop
 # ---------------------------------------------------------------------------
@@ -342,6 +425,8 @@ def run_ttt(
     grad_accum_steps: int = 1,
     block_mask: bool = False,
     prev: Optional[Dict[str, jnp.ndarray]] = None,
+    distogram_consistency: bool = False,
+    lambda_pair: float = 0.1,
 ) -> Tuple[Dict[str, Dict[str, Any]], List[float], List[Dict[str, Any]], int]:
     """Run test-time training and return adapted parameters.
 
@@ -364,6 +449,11 @@ def run_ttt(
             different MSA subset, reducing overfitting. *None* = use all.
         seed: Random seed.
         targets: LoRA targets.  If *None*, auto-discovered.
+        distogram_consistency: If True, add a symmetric KL divergence
+            between distogram predictions from two differently-masked
+            views of the MSA.  Requires ``apply_fn`` to have the
+            distogram head active (see ``make_ttt_apply(distogram=True)``).
+        lambda_pair: Weight for the distogram consistency loss term.
 
     Returns:
         ``(adapted_params, losses, eval_logs, best_step)`` where
@@ -422,42 +512,82 @@ def run_ttt(
     opt_state = optimizer.init(trainable)
 
     # --- 4. JIT-compiled step ------------------------------------------------
-    @jax.jit
-    def step(trainable, opt_state, batch_sq, rng):
-        # jax.checkpoint avoids storing all intermediate activations
-        # (48 Evoformer blocks) — recomputes them during backward instead.
-        @jax.checkpoint
-        def _loss(trainable, batch, rng):
-            return ttt_loss_fn(
-                trainable, base_params, lora_meta, alpha, rank,
-                apply_fn, num_output, batch, rng,
-            )
+    def _make_masked_batch(batch_sq, rng_k):
+        """Subsample + remask → add ensemble dim."""
+        rng_k, sample_rng, mask_rng = jax.random.split(rng_k, 3)
+        b = subsample_msa_jax(batch_sq, sample_rng, msa_sample_size) \
+            if msa_sample_size is not None else batch_sq
+        masked = remask_msa_jax(b, mask_rng, replace_fraction=replace_fraction,
+                                block_mask=block_mask)
+        return jax.tree.map(lambda x: x[None], masked)
 
-        def _single_grad(rng_k):
-            """Loss + grad for one MSA subsample/masking draw."""
-            rng_k, sample_rng, mask_rng, fwd_rng = jax.random.split(rng_k, 4)
-            b = subsample_msa_jax(batch_sq, sample_rng, msa_sample_size) \
-                if msa_sample_size is not None else batch_sq
-            masked = remask_msa_jax(b, mask_rng, replace_fraction=replace_fraction,
-                                    block_mask=block_mask)
-            masked_e = jax.tree.map(lambda x: x[None], masked)
-            return jax.value_and_grad(_loss)(trainable, masked_e, fwd_rng)
+    if distogram_consistency:
+        @jax.jit
+        def step(trainable, opt_state, batch_sq, rng):
+            @jax.checkpoint
+            def _cons_loss(trainable, batch_1, batch_2, rng):
+                return ttt_consistency_loss_fn(
+                    trainable, base_params, lora_meta, alpha, rank,
+                    apply_fn, num_output, batch_1, batch_2, rng,
+                    lambda_pair,
+                )
 
-        # Split one rng per accumulation sample; grad_accum_steps unrolled at
-        # trace time (static Python int captured from closure).
-        rng, *accum_rngs = jax.random.split(rng, grad_accum_steps + 1)
-        loss, grads = _single_grad(accum_rngs[0])
-        for k in range(1, grad_accum_steps):
-            l_k, g_k = _single_grad(accum_rngs[k])
-            loss = loss + l_k
-            grads = jax.tree.map(jnp.add, grads, g_k)
-        if grad_accum_steps > 1:
-            loss = loss / grad_accum_steps
-            grads = jax.tree.map(lambda g: g / grad_accum_steps, grads)
+            def _pair_grad(rng_k):
+                """Loss + grad for one pair of differently-masked views."""
+                rng_k, rng_a, rng_b, fwd_rng = jax.random.split(rng_k, 4)
+                b1 = _make_masked_batch(batch_sq, rng_a)
+                b2 = _make_masked_batch(batch_sq, rng_b)
+                return jax.value_and_grad(_cons_loss)(
+                    trainable, b1, b2, fwd_rng)
 
-        updates, new_opt_state = optimizer.update(grads, opt_state, trainable)
-        new_trainable = optax.apply_updates(trainable, updates)
-        return new_trainable, new_opt_state, loss, rng
+            rng, *accum_rngs = jax.random.split(rng, grad_accum_steps + 1)
+            loss, grads = _pair_grad(accum_rngs[0])
+            for k in range(1, grad_accum_steps):
+                l_k, g_k = _pair_grad(accum_rngs[k])
+                loss = loss + l_k
+                grads = jax.tree.map(jnp.add, grads, g_k)
+            if grad_accum_steps > 1:
+                loss = loss / grad_accum_steps
+                grads = jax.tree.map(lambda g: g / grad_accum_steps, grads)
+
+            updates, new_opt_state = optimizer.update(
+                grads, opt_state, trainable)
+            new_trainable = optax.apply_updates(trainable, updates)
+            return new_trainable, new_opt_state, loss, rng
+    else:
+        @jax.jit
+        def step(trainable, opt_state, batch_sq, rng):
+            # jax.checkpoint avoids storing all intermediate activations
+            # (48 Evoformer blocks) — recomputes them during backward instead.
+            @jax.checkpoint
+            def _loss(trainable, batch, rng):
+                return ttt_loss_fn(
+                    trainable, base_params, lora_meta, alpha, rank,
+                    apply_fn, num_output, batch, rng,
+                )
+
+            def _single_grad(rng_k):
+                """Loss + grad for one MSA subsample/masking draw."""
+                rng_k, fwd_rng = jax.random.split(rng_k)
+                masked_e = _make_masked_batch(batch_sq, rng_k)
+                return jax.value_and_grad(_loss)(trainable, masked_e, fwd_rng)
+
+            # Split one rng per accumulation sample; grad_accum_steps unrolled
+            # at trace time (static Python int captured from closure).
+            rng, *accum_rngs = jax.random.split(rng, grad_accum_steps + 1)
+            loss, grads = _single_grad(accum_rngs[0])
+            for k in range(1, grad_accum_steps):
+                l_k, g_k = _single_grad(accum_rngs[k])
+                loss = loss + l_k
+                grads = jax.tree.map(jnp.add, grads, g_k)
+            if grad_accum_steps > 1:
+                loss = loss / grad_accum_steps
+                grads = jax.tree.map(lambda g: g / grad_accum_steps, grads)
+
+            updates, new_opt_state = optimizer.update(
+                grads, opt_state, trainable)
+            new_trainable = optax.apply_updates(trainable, updates)
+            return new_trainable, new_opt_state, loss, rng
 
     # --- 5. training loop ----------------------------------------------------
     losses: List[float] = []

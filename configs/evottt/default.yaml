@@ -26,7 +26,10 @@ eval_interval: 1
 max_extra_msa: 0
 
 # Experiment flags
-lora_triangle_attention: false  # Exp 1: add LoRA to triangle (pair) attention
+lora_triangle_attention: true  # Exp 1: add LoRA to triangle (pair) attention
+distogram_consistency: true    # Exp 9: distogram consistency loss (symmetric KL between two masked views)
+lambda_pair: 0.1                # weight for distogram consistency loss term
+
 grad_accum_steps: 4             # Exp 5: gradient accumulation over N MSA subsamples
 block_mask: true                # Exp 8: mask entire residue columns (column masking)
 ttt_recycle_prev: false         # frozen prev conditioning from base model recycling      

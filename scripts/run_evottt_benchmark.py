@@ -228,6 +228,13 @@ def main() -> int:
     parser.add_argument('--block_mask', action='store_true',
                         help='Exp 8: mask entire residue columns across all '
                              'sequences instead of independent per-position masking.')
+    parser.add_argument('--distogram_consistency', action='store_true',
+                        help='Exp 9: add distogram consistency loss (symmetric '
+                             'KL between two differently-masked views). '
+                             'Gives pair-level gradient signal for triangle '
+                             'attention LoRA.')
+    parser.add_argument('--lambda_pair', type=float, default=0.1,
+                        help='Weight for distogram consistency loss term.')
     parser.add_argument('--ttt_recycle_prev', action='store_true',
                         help='Run a full AF2 forward pass (with recycling) '
                              'before TTT and use its representations as '
@@ -314,7 +321,8 @@ def main() -> int:
         if args.ttt_crop_size is not None:
             ttt_config.data.eval.crop_size = args.ttt_crop_size
 
-    ttt_apply = make_ttt_apply(ttt_config.model)
+    ttt_apply = make_ttt_apply(ttt_config.model,
+                               distogram=args.distogram_consistency)
 
     # Eval config: full model (all heads) but no recycling for speed
     eval_config = None
@@ -470,6 +478,8 @@ def main() -> int:
                 grad_accum_steps=args.grad_accum_steps,
                 block_mask=args.block_mask,
                 prev=prev,
+                distogram_consistency=args.distogram_consistency,
+                lambda_pair=args.lambda_pair,
             )
             ttt_time = time.time() - t0
             best_info = f', best_step={best_step}' if best_step >= 0 else ''
