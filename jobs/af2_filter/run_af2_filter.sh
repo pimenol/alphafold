@@ -48,11 +48,11 @@ echo "Python: $(which python3) ($(python3 --version 2>&1))"
 echo "============================================"
 
 python3 -u scripts/run_af2_filter.py \
-  --benchmark_csv /scratch/project/open-35-8/data/bfvd/bfvd_beta/sample_100_proteins.csv \
+  --benchmark_csv /scratch/project/open-35-8/data/bfvd/bfvd_beta/input/candidate_filtered_rep_seq_short.csv \
   --msa_dir /scratch/project/open-35-8/data/bfvd/bfvd_beta/input/logan \
   --data_dir /scratch/project/open-35-8/pimenol1/af2_data \
   --output_dir data/bfvd/AF2 \
-  --summary_csv data/bfvd/summary.csv \
+  --summary_csv data/bfvd/candidate_filtered_rep_seq_short.csv \
   --model_name model_1_ptm \
   --skip_existing
 

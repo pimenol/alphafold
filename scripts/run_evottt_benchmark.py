@@ -450,15 +450,22 @@ def main() -> int:
                     _pdb_list.append(pdb_path)
                     return {'plddt': mean_plddt}
 
-            # Optionally compute frozen prev conditioning from base model
+            # Optionally compute frozen prev conditioning from base model.
+            # Must use baseline_config features (ensemble dim = num_recycle+1)
+            # because AlphaFold.do_call slices batch by recycle_idx.
             prev = None
             if args.ttt_recycle_prev:
                 t_prev = time.time()
+                prev_features = load_features_from_a3m(
+                    str(a3m_path), seq, pid, baseline_config,
+                    random_seed=args.seed,
+                )
                 prev = compute_prev_features(
-                    baseline_config.model, base_params, ttt_features,
+                    baseline_config.model, base_params, prev_features,
                     seed=args.seed,
                     num_recycle=args.ttt_prev_num_recycle,
                 )
+                del prev_features
                 print(f'  Computed prev features in {time.time() - t_prev:.1f}s')
 
             t0 = time.time()
@@ -494,6 +501,7 @@ def main() -> int:
         except Exception as e:
             print(f'  TTT failed: {e}')
             traceback.print_exc()
+            jax.clear_caches()
             continue
 
         # ---- adapted prediction (full model with recycling) ----------------
@@ -521,6 +529,7 @@ def main() -> int:
         except Exception as e:
             print(f'  Adapted prediction failed: {e}')
             traceback.print_exc()
+            jax.clear_caches()
             continue
 
         # ---- save results --------------------------------------------------
