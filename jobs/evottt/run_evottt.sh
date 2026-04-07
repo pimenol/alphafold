@@ -64,6 +64,7 @@ mapping = {
     'protein_ids': 'PROTEIN_IDS', 'seed': 'SEED',
     'optimizer': 'OPTIMIZER', 'grad_accum_steps': 'GRAD_ACCUM_STEPS',
     'lambda_pair': 'LAMBDA_PAIR',
+    'ttt_prev_num_recycle': 'TTT_PREV_NUM_RECYCLE',
 }
 bool_mapping = {
     'skip_existing': 'SKIP_EXISTING',
@@ -106,6 +107,7 @@ GRAD_ACCUM_STEPS="${GRAD_ACCUM_STEPS:-1}"
 LORA_TRIANGLE_ATTENTION="${LORA_TRIANGLE_ATTENTION:-}"
 BLOCK_MASK="${BLOCK_MASK:-}"
 TTT_RECYCLE_PREV="${TTT_RECYCLE_PREV:-}"
+TTT_PREV_NUM_RECYCLE="${TTT_PREV_NUM_RECYCLE:-}"
 DISTOGRAM_CONSISTENCY="${DISTOGRAM_CONSISTENCY:-}"
 LAMBDA_PAIR="${LAMBDA_PAIR:-0.1}"
 
@@ -211,6 +213,10 @@ fi
 
 if [[ "${TTT_RECYCLE_PREV:-}" == "true" ]]; then
   CMD+=(--ttt_recycle_prev)
+fi
+
+if [[ -n "${TTT_PREV_NUM_RECYCLE}" ]]; then
+  CMD+=(--ttt_prev_num_recycle "${TTT_PREV_NUM_RECYCLE}")
 fi
 
 if [[ -n "${JACKHMMER_BIN}" && -n "${SEQ_DATABASE}" ]]; then

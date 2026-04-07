@@ -85,6 +85,7 @@ def compute_prev_features(
     base_params: Dict[str, Dict[str, Any]],
     batch: Dict[str, Any],
     seed: int = 0,
+    num_recycle: Optional[int] = None,
 ) -> Dict[str, jnp.ndarray]:
     """Run a full AF2 forward pass (with recycling) and extract prev features.
 
@@ -98,12 +99,17 @@ def compute_prev_features(
         base_params: Frozen pre-trained AF2 params.
         batch: Processed feature dict (with ensemble dim).
         seed: Random seed for the forward pass.
+        num_recycle: Override the number of recycling iterations.
+            *None* uses the model config default (typically 3).
 
     Returns:
         Dict with ``prev_pos``, ``prev_msa_first_row``, ``prev_pair``
         (no ensemble dim, stop-gradiented).
     """
     cfg = copy.deepcopy(model_config)
+    if num_recycle is not None:
+        with cfg.unlocked():
+            cfg.num_recycle = num_recycle
 
     def _forward(batch):
         model = modules.AlphaFold(cfg)

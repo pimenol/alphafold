@@ -25,6 +25,7 @@ import json
 import logging
 import tempfile
 import time
+import traceback
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -239,6 +240,9 @@ def main() -> int:
                         help='Run a full AF2 forward pass (with recycling) '
                              'before TTT and use its representations as '
                              'frozen prev conditioning for the Evoformer.')
+    parser.add_argument('--ttt_prev_num_recycle', type=int, default=None,
+                        help='Number of recycling iterations for computing '
+                             'prev features. None = use model default (3).')
     parser.add_argument('--mask_fraction', type=float, default=0.15)
     parser.add_argument('--ttt_msa_clusters', type=int, default=None,
                         help='Subsample this many MSA rows per TTT step. '
@@ -453,6 +457,7 @@ def main() -> int:
                 prev = compute_prev_features(
                     baseline_config.model, base_params, ttt_features,
                     seed=args.seed,
+                    num_recycle=args.ttt_prev_num_recycle,
                 )
                 print(f'  Computed prev features in {time.time() - t_prev:.1f}s')
 
@@ -488,6 +493,7 @@ def main() -> int:
                   f'{best_info}')
         except Exception as e:
             print(f'  TTT failed: {e}')
+            traceback.print_exc()
             continue
 
         # ---- adapted prediction (full model with recycling) ----------------
@@ -514,6 +520,7 @@ def main() -> int:
             )
         except Exception as e:
             print(f'  Adapted prediction failed: {e}')
+            traceback.print_exc()
             continue
 
         # ---- save results --------------------------------------------------
@@ -557,6 +564,11 @@ def main() -> int:
                     log_entry['plddt'],
                     pdb_path,
                 ])
+
+        # Free GPU memory between proteins: drop large pytrees and clear
+        # XLA compilation cache so differently-shaped inputs don't accumulate.
+        del adapted_params, ttt_losses, eval_logs
+        jax.clear_caches()
 
     # ---- summary -----------------------------------------------------------
     if results:

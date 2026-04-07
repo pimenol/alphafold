@@ -20,7 +20,7 @@ last_n_blocks: 48
 lora_alpha: 8
 optimizer: "sgd"  # "adam" | "adamw" | "sgd"
 
-ttt_msa_clusters: 32  # subsample this many MSA rows per TTT step (null = use all)
+ttt_msa_clusters: 4  # subsample this many MSA rows per TTT step (null = use all)
 ttt_crop_size: 1024
 eval_interval: 1
 max_extra_msa: 0
@@ -31,8 +31,9 @@ distogram_consistency: true    # Exp 9: distogram consistency loss (symmetric KL
 lambda_pair: 0.1                # weight for distogram consistency loss term
 
 grad_accum_steps: 4             # Exp 5: gradient accumulation over N MSA subsamples
-block_mask: true                # Exp 8: mask entire residue columns (column masking)
-ttt_recycle_prev: false         # frozen prev conditioning from base model recycling      
+block_mask: false               # Exp 8: mask entire residue columns (column masking)
+ttt_recycle_prev: true         # frozen prev conditioning from base model recycling
+ttt_prev_num_recycle: 3      # num recycles for prev (null = model default, typically 3)
 mask_fraction: 0.15
 
 # Data paths (defaults match run_evottt.sh)
@@ -43,7 +44,7 @@ output_dir: /scratch/project/open-35-8/pimenol1/alphafold/evottt_outputs
 
 # Subset selection (all optional)
 # protein_ids: "A0A1W6I162, Q98576, A0A059PY42"
-# start_idx: 1
+start_idx: 3
 # end_idx: 10
 seed: 0
 
