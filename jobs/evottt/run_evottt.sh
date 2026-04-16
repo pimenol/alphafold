@@ -69,6 +69,7 @@ mapping = {
 bool_mapping = {
     'skip_existing': 'SKIP_EXISTING',
     'skip_baseline': 'SKIP_BASELINE',
+    'full_finetune': 'FULL_FINETUNE',
     'lora_triangle_attention': 'LORA_TRIANGLE_ATTENTION',
     'block_mask': 'BLOCK_MASK',
     'ttt_recycle_prev': 'TTT_RECYCLE_PREV',
@@ -104,6 +105,7 @@ END_IDX="${END_IDX:-}"
 PROTEIN_IDS="${PROTEIN_IDS:-}"
 OPTIMIZER="${OPTIMIZER:-adam}"
 GRAD_ACCUM_STEPS="${GRAD_ACCUM_STEPS:-1}"
+FULL_FINETUNE="${FULL_FINETUNE:-}"
 LORA_TRIANGLE_ATTENTION="${LORA_TRIANGLE_ATTENTION:-}"
 BLOCK_MASK="${BLOCK_MASK:-}"
 TTT_RECYCLE_PREV="${TTT_RECYCLE_PREV:-}"
@@ -144,6 +146,7 @@ echo "Block mask:      ${BLOCK_MASK:-false}"
 echo "Grad accum:      ${GRAD_ACCUM_STEPS}"
 echo "Distogram cons:  ${DISTOGRAM_CONSISTENCY:-false}"
 echo "Lambda pair:     ${LAMBDA_PAIR}"
+echo "Full fine-tune:  ${FULL_FINETUNE:-false}"
 echo "LoRA tri attn:   ${LORA_TRIANGLE_ATTENTION:-false}"
 echo "MSA clusters:    ${TTT_MSA_CLUSTERS:-none}"
 echo "Crop size:       ${TTT_CROP_SIZE:-none}"
@@ -197,6 +200,10 @@ fi
 
 if [[ -n "${PROTEIN_IDS}" ]]; then
   CMD+=(--protein_ids "${PROTEIN_IDS}")
+fi
+
+if [[ "${FULL_FINETUNE:-}" == "true" ]]; then
+  CMD+=(--full_finetune)
 fi
 
 if [[ "${LORA_TRIANGLE_ATTENTION:-}" == "true" ]]; then

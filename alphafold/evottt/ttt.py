@@ -406,6 +406,134 @@ def ttt_consistency_loss_fn(
 
 
 # ---------------------------------------------------------------------------
+# Full fine-tune (no LoRA) helpers
+# ---------------------------------------------------------------------------
+
+def init_finetune_trainable(
+    base_params: Dict[str, Dict[str, Any]],
+    targets: List[LoRATarget],
+    last_n_blocks: int = 48,
+) -> Tuple[Dict[str, jnp.ndarray], Dict[str, Dict[str, int]]]:
+    """Extract trainable weight slices from the last N evoformer blocks.
+
+    Instead of LoRA's low-rank A/B matrices, this extracts the full
+    attention weight tensors for the last ``last_n_blocks`` blocks.
+
+    Args:
+        base_params: Frozen base AF2 params.
+        targets: List of (scope, param_name) from find_lora_targets.
+        last_n_blocks: Number of trailing Evoformer blocks to fine-tune.
+
+    Returns:
+        ``(trainable, meta)`` where *trainable* maps ``"scope//name"``
+        to a weight slice and *meta* stores the split index per target.
+    """
+    trainable: Dict[str, jnp.ndarray] = {}
+    meta: Dict[str, Dict[str, int]] = {}
+    for scope, name in targets:
+        w = base_params[scope][name]
+        num_blocks = w.shape[0]
+        start = max(0, num_blocks - last_n_blocks)
+        key = f'{scope}//{name}'
+        trainable[key] = w[start:]
+        meta[key] = {'start': start, 'num_blocks': num_blocks}
+    return trainable, meta
+
+
+def merge_finetune_into_params(
+    base_params: Dict[str, Dict[str, Any]],
+    trainable: Dict[str, jnp.ndarray],
+    meta: Dict[str, Dict[str, int]],
+) -> Dict[str, Dict[str, Any]]:
+    """Replace target weight slices with fine-tuned values.
+
+    Concatenates frozen prefix blocks with the trainable suffix blocks.
+    """
+    merged = {}
+    for scope in base_params:
+        merged[scope] = dict(base_params[scope])
+
+    for key, val in trainable.items():
+        scope, name = key.split('//')
+        start = meta[key]['start']
+        if start == 0:
+            merged[scope][name] = val
+        else:
+            frozen = base_params[scope][name][:start]
+            merged[scope][name] = jnp.concatenate([frozen, val], axis=0)
+
+    return merged
+
+
+def ttt_finetune_loss_fn(
+    trainable: Dict[str, jnp.ndarray],
+    base_params: Dict[str, Dict[str, Any]],
+    ft_meta: Dict[str, Dict[str, int]],
+    apply_fn,
+    num_output: int,
+    batch: Dict[str, Any],
+    rng: jnp.ndarray,
+) -> jnp.ndarray:
+    """Masked-MSA loss with directly fine-tuned parameters (no LoRA)."""
+    merged_params = merge_finetune_into_params(base_params, trainable, ft_meta)
+    output = apply_fn(merged_params, rng, batch)
+    logits = output['masked_msa']['logits']
+    batch_sq = jax.tree.map(lambda x: x[0] if x.ndim > 0 else x, batch)
+    errors = softmax_cross_entropy(
+        labels=jax.nn.one_hot(batch_sq['true_msa'], num_classes=num_output),
+        logits=logits,
+    )
+    return jnp.sum(errors * batch_sq['bert_mask'], axis=(-2, -1)) / (
+        1e-8 + jnp.sum(batch_sq['bert_mask'], axis=(-2, -1))
+    )
+
+
+def ttt_finetune_consistency_loss_fn(
+    trainable: Dict[str, jnp.ndarray],
+    base_params: Dict[str, Dict[str, Any]],
+    ft_meta: Dict[str, Dict[str, int]],
+    apply_fn,
+    num_output: int,
+    batch_1: Dict[str, Any],
+    batch_2: Dict[str, Any],
+    rng: jnp.ndarray,
+    lambda_pair: float,
+) -> jnp.ndarray:
+    """Masked-MSA + distogram consistency loss with fine-tuned params."""
+    merged_params = merge_finetune_into_params(base_params, trainable, ft_meta)
+
+    rng1, rng2 = jax.random.split(rng)
+    output_1 = apply_fn(merged_params, rng1, batch_1)
+    output_2 = apply_fn(merged_params, rng2, batch_2)
+
+    def _mlm_loss(output, batch):
+        logits = output['masked_msa']['logits']
+        batch_sq = jax.tree.map(lambda x: x[0] if x.ndim > 0 else x, batch)
+        errors = softmax_cross_entropy(
+            labels=jax.nn.one_hot(batch_sq['true_msa'], num_classes=num_output),
+            logits=logits,
+        )
+        return jnp.sum(errors * batch_sq['bert_mask'], axis=(-2, -1)) / (
+            1e-8 + jnp.sum(batch_sq['bert_mask'], axis=(-2, -1))
+        )
+
+    mlm_loss = 0.5 * (_mlm_loss(output_1, batch_1) + _mlm_loss(output_2, batch_2))
+
+    logits_1 = output_1['distogram']['logits']
+    logits_2 = output_2['distogram']['logits']
+    p = jax.nn.softmax(logits_1)
+    q = jax.nn.softmax(logits_2)
+    log_p = jax.nn.log_softmax(logits_1)
+    log_q = jax.nn.log_softmax(logits_2)
+
+    kl_pq = jnp.sum(p * (log_p - log_q), axis=-1)
+    kl_qp = jnp.sum(q * (log_q - log_p), axis=-1)
+    consistency_loss = 0.5 * jnp.mean(kl_pq + kl_qp)
+
+    return mlm_loss + lambda_pair * consistency_loss
+
+
+# ---------------------------------------------------------------------------
 # Main TTT training loop
 # ---------------------------------------------------------------------------
 
@@ -433,6 +561,7 @@ def run_ttt(
     prev: Optional[Dict[str, jnp.ndarray]] = None,
     distogram_consistency: bool = False,
     lambda_pair: float = 0.1,
+    full_finetune: bool = False,
 ) -> Tuple[Dict[str, Dict[str, Any]], List[float], List[Dict[str, Any]], int]:
     """Run test-time training and return adapted parameters.
 
@@ -445,26 +574,20 @@ def run_ttt(
             ``process_features``).  Must contain ``'true_msa'``.
         num_steps: Number of TTT gradient steps.
         learning_rate: Adam learning rate.
-        rank: LoRA rank.
+        rank: LoRA rank (ignored when ``full_finetune=True``).
         last_n_blocks: How many trailing Evoformer blocks to adapt.
-        alpha: LoRA scaling factor.
-
-        replace_fraction: MSA masking fraction per step.
-        msa_sample_size: If set, randomly subsample this many MSA rows
-            (from the full pool) at each TTT step. Gives each step a
-            different MSA subset, reducing overfitting. *None* = use all.
-        seed: Random seed.
-        targets: LoRA targets.  If *None*, auto-discovered.
+        alpha: LoRA scaling factor (ignored when ``full_finetune=True``).
         distogram_consistency: If True, add a symmetric KL divergence
             between distogram predictions from two differently-masked
-            views of the MSA.  Requires ``apply_fn`` to have the
-            distogram head active (see ``make_ttt_apply(distogram=True)``).
+            views of the MSA.
         lambda_pair: Weight for the distogram consistency loss term.
+        full_finetune: If True, directly fine-tune the last N block
+            weights instead of using LoRA decomposition.
 
     Returns:
         ``(adapted_params, losses, eval_logs, best_step)`` where
-        *adapted_params* has LoRA deltas from the step with the highest
-        pLDDT merged in (or the final step if no eval_fn is provided),
+        *adapted_params* has adapted weights from the step with the
+        highest pLDDT merged in (or the final step if no eval_fn),
         *losses* is a list of per-step loss values, and *best_step* is
         the TTT step index that was selected (-1 if no eval).
     """
@@ -491,14 +614,23 @@ def run_ttt(
                 batch_squeezed[pk] = prev[pk]
         logger.info('Injecting frozen prev conditioning into TTT batch')
 
-    # --- 2. init LoRA -------------------------------------------------------
-    rng, init_rng = jax.random.split(rng)
-    lora_meta, _alpha, _rank = init_lora_params(
-        base_params, targets,
-        rank=rank, last_n_blocks=last_n_blocks, alpha=alpha,
-        rng_key=init_rng,
-    )
-    trainable = trainable_from_lora(lora_meta)
+    # --- 2. init trainable params --------------------------------------------
+    if full_finetune:
+        trainable, ft_meta = init_finetune_trainable(
+            base_params, targets, last_n_blocks=last_n_blocks)
+    else:
+        rng, init_rng = jax.random.split(rng)
+        lora_meta, _alpha, _rank = init_lora_params(
+            base_params, targets,
+            rank=rank, last_n_blocks=last_n_blocks, alpha=alpha,
+            rng_key=init_rng,
+        )
+        trainable = trainable_from_lora(lora_meta)
+
+    n_params = sum(v.size for v in jax.tree.leaves(trainable))
+    logger.info('%s: %d trainable parameters across %d targets',
+                'Full fine-tune' if full_finetune else 'LoRA',
+                n_params, len(targets))
 
     # --- 3. optimizer (warmup + cosine decay) --------------------------------
     warmup_steps = max(1, num_steps // 10)
@@ -527,19 +659,44 @@ def run_ttt(
                                 block_mask=block_mask)
         return jax.tree.map(lambda x: x[None], masked)
 
+    # Mode-specific loss closures (captured by the JIT step function below).
+    # This avoids duplicating the accumulation logic for LoRA vs full FT.
+    if full_finetune:
+        def _raw_loss(trainable, batch, rng):
+            return ttt_finetune_loss_fn(
+                trainable, base_params, ft_meta,
+                apply_fn, num_output, batch, rng)
+
+        def _raw_cons_loss(trainable, b1, b2, rng):
+            return ttt_finetune_consistency_loss_fn(
+                trainable, base_params, ft_meta,
+                apply_fn, num_output, b1, b2, rng, lambda_pair)
+
+        def _merge_trainable(t):
+            return merge_finetune_into_params(base_params, t, ft_meta)
+    else:
+        def _raw_loss(trainable, batch, rng):
+            return ttt_loss_fn(
+                trainable, base_params, lora_meta, alpha, rank,
+                apply_fn, num_output, batch, rng)
+
+        def _raw_cons_loss(trainable, b1, b2, rng):
+            return ttt_consistency_loss_fn(
+                trainable, base_params, lora_meta, alpha, rank,
+                apply_fn, num_output, b1, b2, rng, lambda_pair)
+
+        def _merge_trainable(t):
+            lora = update_lora_from_trainable(lora_meta, t)
+            return merge_lora_into_params(base_params, lora, alpha, rank)
+
     if distogram_consistency:
         @jax.jit
         def step(trainable, opt_state, batch_sq, rng):
             @jax.checkpoint
             def _cons_loss(trainable, batch_1, batch_2, rng):
-                return ttt_consistency_loss_fn(
-                    trainable, base_params, lora_meta, alpha, rank,
-                    apply_fn, num_output, batch_1, batch_2, rng,
-                    lambda_pair,
-                )
+                return _raw_cons_loss(trainable, batch_1, batch_2, rng)
 
             def _pair_grad(rng_k):
-                """Loss + grad for one pair of differently-masked views."""
                 rng_k, rng_a, rng_b, fwd_rng = jax.random.split(rng_k, 4)
                 b1 = _make_masked_batch(batch_sq, rng_a)
                 b2 = _make_masked_batch(batch_sq, rng_b)
@@ -563,23 +720,15 @@ def run_ttt(
     else:
         @jax.jit
         def step(trainable, opt_state, batch_sq, rng):
-            # jax.checkpoint avoids storing all intermediate activations
-            # (48 Evoformer blocks) — recomputes them during backward instead.
             @jax.checkpoint
             def _loss(trainable, batch, rng):
-                return ttt_loss_fn(
-                    trainable, base_params, lora_meta, alpha, rank,
-                    apply_fn, num_output, batch, rng,
-                )
+                return _raw_loss(trainable, batch, rng)
 
             def _single_grad(rng_k):
-                """Loss + grad for one MSA subsample/masking draw."""
                 rng_k, fwd_rng = jax.random.split(rng_k)
                 masked_e = _make_masked_batch(batch_sq, rng_k)
                 return jax.value_and_grad(_loss)(trainable, masked_e, fwd_rng)
 
-            # Split one rng per accumulation sample; grad_accum_steps unrolled
-            # at trace time (static Python int captured from closure).
             rng, *accum_rngs = jax.random.split(rng, grad_accum_steps + 1)
             loss, grads = _single_grad(accum_rngs[0])
             for k in range(1, grad_accum_steps):
@@ -605,8 +754,7 @@ def run_ttt(
     best_trainable: Optional[Dict[str, Dict[str, jnp.ndarray]]] = None
 
     def _merge_current_params():
-        cur_lora = update_lora_from_trainable(lora_meta, trainable)
-        return merge_lora_into_params(base_params, cur_lora, alpha, rank)
+        return _merge_trainable(trainable)
 
     def _update_best(step_idx, plddt_val):
         nonlocal best_plddt, best_step, best_trainable
@@ -660,15 +808,12 @@ def run_ttt(
         elif i % 10 == 0 or i == num_steps - 1:
             print(f'  TTT step {i:>3d}/{num_steps}: loss = {loss_val:.4f}')
 
-    # --- 6. merge best (or final) LoRA into base params ----------------------
+    # --- 6. merge best (or final) trainable into base params -----------------
     if best_trainable is not None:
         logger.info('Using best pLDDT params from step %d (pLDDT=%.5f)',
                      best_step, best_plddt)
-        best_lora = update_lora_from_trainable(lora_meta, best_trainable)
-        adapted_params = merge_lora_into_params(base_params, best_lora, alpha, rank)
+        adapted_params = _merge_trainable(best_trainable)
     else:
-        # No eval_fn provided — fall back to final step
-        final_lora = update_lora_from_trainable(lora_meta, trainable)
-        adapted_params = merge_lora_into_params(base_params, final_lora, alpha, rank)
+        adapted_params = _merge_trainable(trainable)
 
     return adapted_params, losses, eval_logs, best_step
