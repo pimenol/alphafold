@@ -220,6 +220,9 @@ def main() -> int:
     parser.add_argument('--optimizer', default='adam',
                         choices=['adam', 'adamw', 'sgd'],
                         help='Optimizer for TTT.')
+    parser.add_argument('--full_finetune', action='store_true',
+                        help='Exp 10: directly fine-tune last N block weights '
+                             'instead of using LoRA decomposition.')
     parser.add_argument('--lora_triangle_attention', action='store_true',
                         help='Exp 1: also apply LoRA to triangle attention '
                              '(pair representation), not just MSA attention.')
@@ -492,6 +495,7 @@ def main() -> int:
                 prev=prev,
                 distogram_consistency=args.distogram_consistency,
                 lambda_pair=args.lambda_pair,
+                full_finetune=args.full_finetune,
             )
             ttt_time = time.time() - t0
             best_info = f', best_step={best_step}' if best_step >= 0 else ''

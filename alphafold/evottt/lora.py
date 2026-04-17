@@ -57,6 +57,28 @@ def find_lora_targets(
     return targets
 
 
+def find_finetune_targets(
+    params: Dict[str, Dict[str, Any]],
+) -> List[LoRATarget]:
+    """Discover every param in the main Evoformer stack (for full FT).
+
+    Returns all (scope, name) pairs whose scope sits inside the main
+    ``evoformer_iteration`` stack (i.e. excludes ``extra_msa_stack``).
+    This covers attention, MLP/transition, triangle multiplication,
+    triangle attention, outer-product-mean, and all layer norms —
+    everything stacked with a leading block dim via ``layer_stack``.
+    """
+    targets: List[LoRATarget] = []
+    for scope in sorted(params.keys()):
+        if 'evoformer_iteration' not in scope:
+            continue
+        if 'extra_msa_stack' in scope:
+            continue
+        for name in sorted(params[scope].keys()):
+            targets.append((scope, name))
+    return targets
+
+
 def _weight_dims(name: str, shape: Tuple[int, ...]) -> Tuple[int, int]:
     """Compute (d_in, d_out) for a stacked attention weight.
 

@@ -1,255 +1,218 @@
 #!/usr/bin/env python3
-# Copyright 2021 DeepMind Technologies Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+"""Run baseline AlphaFold2 on proteins listed in a benchmark CSV.
 
-"""Run full AlphaFold2 (run_alphafold.py) on proteins listed in a benchmark CSV.
-
-Path layout for --data_dir matches docker/run_docker.py (official download tree).
+Uses precomputed MSAs (.a3m) and the AF2 model API directly — no genetic
+database search required.  For each protein:
+  1. Load precomputed MSA
+  2. Run full AF2 prediction (with recycling)
+  3. Save PDB and pLDDT scores
 """
 
 from __future__ import annotations
 
+import os
+os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')
+_xla = os.environ.get('XLA_FLAGS', '')
+if '--xla_gpu_enable_triton_gemm' not in _xla:
+    os.environ['XLA_FLAGS'] = f'{_xla} --xla_gpu_enable_triton_gemm=false'.strip()
+
 import argparse
 import csv
-import os
-import subprocess
-import sys
+import json
+import time
 from pathlib import Path
-from typing import List, Optional, Sequence, Tuple
+from typing import Any, Dict, List
+
+import jax
+import numpy as np
+
+print(f'[init] jax devices={jax.devices()}', flush=True)
+
+from alphafold.common import confidence, protein, residue_constants
+from alphafold.data import parsers, pipeline
+from alphafold.model import config as af_config
+from alphafold.model import data as af_data
+from alphafold.model import features as af_features
+from alphafold.model import model as af_model
+
+print('[init] imports done', flush=True)
 
 
-def _database_paths(data_dir: Path, db_preset: str, model_preset: str) -> List[Tuple[str, Path]]:
-    """Return (flag_name, path) pairs for run_alphafold.py."""
-    paths: List[Tuple[str, Path]] = [
-        ('uniref90_database_path', data_dir / 'uniref90' / 'uniref90.fasta'),
-        (
-            'mgnify_database_path',
-            data_dir / 'mgnify' / 'mgy_clusters_2022_05.fa',
-        ),
-        ('template_mmcif_dir', data_dir / 'pdb_mmcif' / 'mmcif_files'),
-        ('obsolete_pdbs_path', data_dir / 'pdb_mmcif' / 'obsolete.dat'),
-    ]
-    if 'multimer' in model_preset:
-        paths.append(('uniprot_database_path', data_dir / 'uniprot' / 'uniprot.fasta'))
-        paths.append(
-            ('pdb_seqres_database_path', data_dir / 'pdb_seqres' / 'pdb_seqres.txt')
-        )
-    else:
-        paths.append(('pdb70_database_path', data_dir / 'pdb70' / 'pdb70'))
+def load_features_from_a3m(
+    a3m_path: str,
+    sequence: str,
+    protein_id: str,
+    model_config,
+    random_seed: int = 0,
+) -> Dict[str, np.ndarray]:
+    """Build processed feature dict from a precomputed A3M file."""
+    with open(a3m_path, 'r') as f:
+        a3m_string = f.read()
+    msa = parsers.parse_a3m(a3m_string)
 
-    if db_preset == 'reduced_dbs':
-        paths.append(
-            (
-                'small_bfd_database_path',
-                data_dir / 'small_bfd' / 'bfd-first_non_consensus_sequences.fasta',
-            )
-        )
-    else:
-        paths.append(
-            (
-                'bfd_database_path',
-                data_dir / 'bfd' / 'bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt',
-            )
-        )
-        paths.append(
-            ('uniref30_database_path', data_dir / 'uniref30' / 'UniRef30_2021_03')
-        )
-    return paths
+    num_res = len(sequence)
+    raw_features: Dict[str, Any] = {}
+    raw_features.update(
+        pipeline.make_sequence_features(sequence, protein_id, num_res)
+    )
+    raw_features.update(pipeline.make_msa_features([msa]))
+
+    raw_features['template_aatype'] = np.zeros(
+        (1, num_res, len(residue_constants.restypes_with_x_and_gap)), np.float32)
+    raw_features['template_all_atom_masks'] = np.zeros(
+        (1, num_res, residue_constants.atom_type_num), np.float32)
+    raw_features['template_all_atom_positions'] = np.zeros(
+        (1, num_res, residue_constants.atom_type_num, 3), np.float32)
+    raw_features['template_domain_names'] = np.array(
+        [''.encode()], dtype=object)
+    raw_features['template_sequence'] = np.array(
+        [''.encode()], dtype=object)
+    raw_features['template_sum_probs'] = np.array([0], dtype=np.float32)
+
+    return af_features.np_example_to_features(
+        np_example=raw_features, config=model_config, random_seed=random_seed)
 
 
-def _parse_benchmark_csv(csv_path: Path) -> List[dict]:
-    rows = []
-    with open(csv_path, newline='') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            rows.append(row)
-    return rows
-
-
-def _write_fasta(path: Path, protein_id: str, sequence: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, 'w') as f:
-        f.write(f'>{protein_id}\n{sequence.strip()}\n')
-
-
-def _build_command(
-    run_alphafold: Path,
-    fasta_path: Path,
-    output_base: Path,
-    data_dir: Path,
-    db_preset: str,
-    model_preset: str,
-    max_template_date: str,
-    use_precomputed_msas: bool,
-    use_gpu_relax: bool,
-    random_seed: Optional[int],
-    passthrough: Sequence[str],
-) -> List[str]:
-    cmd: List[str] = [sys.executable, str(run_alphafold)]
-    cmd.append(f'--fasta_paths={fasta_path}')
-    cmd.append(f'--output_dir={output_base}')
-    cmd.append(f'--data_dir={data_dir}')
-
-    for name, p in _database_paths(data_dir, db_preset, model_preset):
-        cmd.append(f'--{name}={p}')
-
-    cmd.append(f'--max_template_date={max_template_date}')
-    cmd.append(f'--db_preset={db_preset}')
-    cmd.append(f'--model_preset={model_preset}')
-    cmd.append(f'--use_precomputed_msas={str(use_precomputed_msas).lower()}')
-    cmd.append(f'--use_gpu_relax={str(use_gpu_relax).lower()}')
-    if random_seed is not None:
-        cmd.append(f'--random_seed={random_seed}')
-    cmd.extend(passthrough)
-    return cmd
+def save_prediction_pdb(
+    prediction_result: Dict[str, Any],
+    features: Dict[str, np.ndarray],
+    pdb_path: str,
+) -> None:
+    plddt = confidence.compute_plddt(
+        prediction_result['predicted_lddt']['logits'])
+    plddt_b_factors = np.repeat(
+        plddt[:, None], residue_constants.atom_type_num, axis=-1)
+    prot = protein.from_prediction(
+        features=features, result=prediction_result,
+        b_factors=plddt_b_factors, remove_leading_feature_dimension=True)
+    Path(pdb_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(pdb_path, 'w') as f:
+        f.write(protein.to_pdb(prot))
 
 
 def main() -> int:
-    repo_root = Path(__file__).resolve().parent.parent
-    default_csv = (
-        Path('/scratch/project/open-35-8/pimenol1/ProteinTTT/ProteinTTT_fresh')
-        / 'data' / 'benchmark' / 'summary.csv'
+    default_csv = Path(
+        '/scratch/project/open-35-8/pimenol1/alphafold/data/bfvd/summary.csv'
+    )
+    default_msa_dir = Path(
+        '/scratch/project/open-35-8/data/bfvd/bfvd_beta/input/logan'
     )
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        '--benchmark_csv',
-        type=Path,
-        default=default_csv if default_csv.is_file() else None,
-        help='CSV with columns id, sequence (and optional length).',
-    )
-    parser.add_argument(
-        '--data_dir',
-        type=Path,
-        required=True,
-        help='AlphaFold data root (params + genetic DBs + pdb_mmcif), same as Docker.',
-    )
-    parser.add_argument(
-        '--output_dir',
-        type=Path,
-        required=True,
-        help='Base output directory; each protein is written to <output_dir>/<id>/.',
-    )
-    parser.add_argument(
-        '--fasta_dir',
-        type=Path,
-        default=None,
-        help='Where to write per-protein FASTAs (default: <output_dir>/fastas).',
-    )
-    parser.add_argument(
-        '--db_preset',
-        choices=('full_dbs', 'reduced_dbs'),
-        default='full_dbs',
-    )
-    parser.add_argument(
-        '--model_preset',
-        choices=(
-            'monomer',
-            'monomer_casp14',
-            'monomer_ptm',
-            'multimer',
-        ),
-        default='monomer_ptm',
-    )
-    parser.add_argument(
-        '--max_template_date',
-        default='2022-01-01',
-        help='ISO date; use a recent date if you want more templates.',
-    )
-    parser.add_argument('--use_precomputed_msas', action='store_true')
-    parser.add_argument('--no_gpu_relax', action='store_true')
-    parser.add_argument('--random_seed', type=int, default=None)
+    parser.add_argument('--benchmark_csv', type=Path,
+                        default=default_csv if default_csv.is_file() else None)
+    parser.add_argument('--msa_dir', type=Path, default=default_msa_dir,
+                        help='Directory with precomputed A3M files.')
+    parser.add_argument('--data_dir', type=Path, required=True,
+                        help='AF2 data root (needs params/ subdirectory).')
+    parser.add_argument('--output_dir', type=Path, required=True)
+    parser.add_argument('--model_name', default='model_1_ptm')
+    parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--start_idx', type=int, default=0)
     parser.add_argument('--end_idx', type=int, default=None)
-    parser.add_argument(
-        '--protein_ids',
-        default=None,
-        help='Comma-separated subset of IDs to run (optional).',
-    )
-    parser.add_argument(
-        '--skip_existing',
-        action='store_true',
-        help='Skip if <output_dir>/<id>/ranking_debug.json already exists.',
-    )
-    args, passthrough = parser.parse_known_args()
+    parser.add_argument('--protein_ids', default=None,
+                        help='Comma-separated subset of IDs to run.')
+    parser.add_argument('--skip_existing', action='store_true')
+    args = parser.parse_args()
 
     if args.benchmark_csv is None:
-        print('Provide --benchmark_csv or place summary.csv at the default path.', file=sys.stderr)
+        print('Provide --benchmark_csv')
         return 1
 
-    csv_path = args.benchmark_csv.resolve()
-    data_dir = args.data_dir.resolve()
-    output_dir = args.output_dir.resolve()
-    fasta_dir = (args.fasta_dir or output_dir / 'fastas').resolve()
-    run_alphafold = repo_root / 'run_alphafold.py'
+    # Read CSV
+    rows: List[dict] = []
+    with open(args.benchmark_csv, newline='') as f:
+        for row in csv.DictReader(f):
+            rows.append(row)
 
-    if not run_alphafold.is_file():
-        print(f'Missing {run_alphafold}', file=sys.stderr)
-        return 1
-
-    rows = _parse_benchmark_csv(csv_path)
     if args.protein_ids:
         wanted = set(args.protein_ids.split(','))
         rows = [r for r in rows if r['id'] in wanted]
 
-    end = args.end_idx if args.end_idx is not None else len(rows)
-    subset = rows[args.start_idx : end]
+    end = args.end_idx or len(rows)
+    rows = rows[args.start_idx:end]
 
-    use_gpu_relax = not args.no_gpu_relax
-    failures = []
+    if not rows:
+        print('No proteins to process.')
+        return 0
 
-    for i, row in enumerate(subset):
+    # Setup model
+    print(f'Model: {args.model_name}')
+    model_config = af_config.model_config(args.model_name)
+    params = af_data.get_model_haiku_params(args.model_name, str(args.data_dir))
+    runner = af_model.RunModel(model_config, params=params)
+
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    results: List[dict] = []
+
+    for i, row in enumerate(rows):
         pid = row['id'].strip()
         seq = row['sequence'].strip()
-        out_sub = output_dir / pid
-        if args.skip_existing and (out_sub / 'ranking_debug.json').is_file():
-            print(f'[{args.start_idx + i + 1}] {pid} skip (exists)')
+        a3m_path = args.msa_dir / f'{pid}.a3m'
+
+        protein_dir = args.output_dir / pid
+        result_path = protein_dir / 'result.json'
+        if args.skip_existing and result_path.exists():
+            print(f'[{i+1}] {pid}: already done, skipping')
             continue
 
-        fasta_path = fasta_dir / f'{pid}.fasta'
-        _write_fasta(fasta_path, pid, seq)
+        if not a3m_path.exists():
+            print(f'[{i+1}] {pid}: no MSA at {a3m_path}, skipping')
+            continue
 
-        cmd = _build_command(
-            run_alphafold=run_alphafold,
-            fasta_path=fasta_path,
-            output_base=output_dir,
-            data_dir=data_dir,
-            db_preset=args.db_preset,
-            model_preset=args.model_preset,
-            max_template_date=args.max_template_date,
-            use_precomputed_msas=args.use_precomputed_msas,
-            use_gpu_relax=use_gpu_relax,
-            random_seed=args.random_seed,
-            passthrough=passthrough,
-        )
+        print(f'[{i+1}] {pid} (len={len(seq)}) ...', flush=True)
 
-        global_idx = args.start_idx + i + 1
-        print(f'[{global_idx}] {pid} ({len(seq)} aa) ...', flush=True)
-        env = os.environ.copy()
-        env.setdefault('TF_FORCE_UNIFIED_MEMORY', '1')
-        env.setdefault('XLA_PYTHON_CLIENT_MEM_FRACTION', '4.0')
+        try:
+            features = load_features_from_a3m(
+                str(a3m_path), seq, pid, model_config,
+                random_seed=args.seed)
+            t0 = time.time()
+            prediction = runner.predict(features, random_seed=args.seed)
+            elapsed = time.time() - t0
 
-        rc = subprocess.call(cmd, cwd=str(repo_root), env=env)
-        if rc != 0:
-            print(f'FAILED {pid} rc={rc}', file=sys.stderr)
-            failures.append(pid)
+            plddt = confidence.compute_plddt(
+                prediction['predicted_lddt']['logits'])
+            mean_plddt = float(np.mean(plddt))
+            print(f'  pLDDT: {mean_plddt:.2f}  ({elapsed:.1f}s)')
 
-    if failures:
-        print(f'Failed ({len(failures)}): {failures}', file=sys.stderr)
-        return 1
+            save_prediction_pdb(
+                prediction, features,
+                str(protein_dir / 'baseline.pdb'))
+
+            result = {
+                'id': pid,
+                'length': len(seq),
+                'mean_plddt': round(mean_plddt, 4),
+                'time_s': round(elapsed, 1),
+            }
+            results.append(result)
+
+            protein_dir.mkdir(parents=True, exist_ok=True)
+            with open(result_path, 'w') as f:
+                json.dump(result, f, indent=2)
+
+        except Exception as e:
+            print(f'  FAILED: {e}')
+            jax.clear_caches()
+            continue
+
+    # Summary
+    if results:
+        summary_path = args.output_dir / 'summary.csv'
+        fieldnames = ['id', 'length', 'mean_plddt', 'time_s']
+        with open(summary_path, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(results)
+
+        plddts = [r['mean_plddt'] for r in results]
+        print(f'\n=== Summary ({len(results)} proteins) ===')
+        print(f'Mean pLDDT:   {np.mean(plddts):.2f}')
+        print(f'Median pLDDT: {np.median(plddts):.2f}')
+        print(f'Results saved to {summary_path}')
+
     return 0
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    raise SystemExit(main())

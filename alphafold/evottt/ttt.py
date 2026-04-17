@@ -24,6 +24,7 @@ logger = logging.getLogger('evottt')
 
 from alphafold.evottt.lora import (
     LoRATarget,
+    find_finetune_targets,
     find_lora_targets,
     init_lora_params,
     merge_lora_into_params,
@@ -591,9 +592,15 @@ def run_ttt(
         *losses* is a list of per-step loss values, and *best_step* is
         the TTT step index that was selected (-1 if no eval).
     """
-    if targets is None:
-        targets = find_lora_targets(base_params,
-                                    triangle_attention=lora_triangle_attention)
+    # LoRA uses the attention-only target set (optionally + triangle).
+    # Full fine-tune always targets every param in the main evoformer stack,
+    # regardless of the user-supplied `targets` (LoRA-only arg).
+    if full_finetune:
+        ft_targets = find_finetune_targets(base_params)
+    else:
+        if targets is None:
+            targets = find_lora_targets(
+                base_params, triangle_attention=lora_triangle_attention)
 
     rng = jax.random.PRNGKey(seed)
 
@@ -617,7 +624,8 @@ def run_ttt(
     # --- 2. init trainable params --------------------------------------------
     if full_finetune:
         trainable, ft_meta = init_finetune_trainable(
-            base_params, targets, last_n_blocks=last_n_blocks)
+            base_params, ft_targets, last_n_blocks=last_n_blocks)
+        n_targets = len(ft_targets)
     else:
         rng, init_rng = jax.random.split(rng)
         lora_meta, _alpha, _rank = init_lora_params(
@@ -626,11 +634,12 @@ def run_ttt(
             rng_key=init_rng,
         )
         trainable = trainable_from_lora(lora_meta)
+        n_targets = len(targets)
 
     n_params = sum(v.size for v in jax.tree.leaves(trainable))
     logger.info('%s: %d trainable parameters across %d targets',
                 'Full fine-tune' if full_finetune else 'LoRA',
-                n_params, len(targets))
+                n_params, n_targets)
 
     # --- 3. optimizer (warmup + cosine decay) --------------------------------
     warmup_steps = max(1, num_steps // 10)

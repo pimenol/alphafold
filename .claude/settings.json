@@ -11,7 +11,9 @@
       "Bash(PYTHONPATH=/scratch/project/open-35-8/pimenol1/alphafold:$PYTHONPATH JAX_PLATFORMS=cpu $PYTHON -c \":*)",
       "Bash(PYTHONPATH=/scratch/project/open-35-8/pimenol1/alphafold:$PYTHONPATH JAX_PLATFORMS=cpu TF_FORCE_UNIFIED_MEMORY=1 $PYTHON scripts/run_evottt_benchmark.py --benchmark_csv /scratch/project/open-35-8/pimenol1/ProteinTTT/ProteinTTT_fresh/data/benchmark/summary.csv --msa_dir /scratch/project/open-35-8/antonb/bfvd/bfvd_msa --data_dir /scratch/project/open-35-8/pimenol1/af2_data --output_dir /scratch/project/open-35-8/pimenol1/alphafold/evottt_outputs --model_name model_1_ptm --ttt_steps 3 --ttt_lr 1e-4 --lora_rank 4 --protein_ids A0A6J5N0Y1 --seed 0)",
       "Bash(JAX_PLATFORMS=cpu TF_FORCE_UNIFIED_MEMORY=1 TF_CPP_MIN_LOG_LEVEL=3 PYTHONPATH=/scratch/project/open-35-8/pimenol1/alphafold:$PYTHONPATH:- $PYTHON -c \":*)",
-      "Bash(squeue -u pimenol1 -j 4079955)"
+      "Bash(squeue -u pimenol1 -j 4079955)",
+      "Bash(bash -n /scratch/project/open-35-8/pimenol1/alphafold/jobs/evottt/run_evottt.sh)",
+      "Bash(/scratch/project/open-35-8/pimenol1/miniconda3/envs/alphafold_evottt/bin/python3 -c \"import yaml; yaml.safe_load\\(open\\('/scratch/project/open-35-8/pimenol1/alphafold/configs/evottt/default.yaml'\\)\\); print\\('default.yaml: OK'\\)\")"
     ]
   }
 }
