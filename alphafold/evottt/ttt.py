@@ -24,6 +24,7 @@ logger = logging.getLogger('evottt')
 
 from alphafold.evottt.lora import (
     LoRATarget,
+    _compute_delta,
     find_finetune_targets,
     find_lora_targets,
     init_lora_params,
@@ -37,20 +38,30 @@ from alphafold.evottt.lora import (
 # TTT forward function
 # ---------------------------------------------------------------------------
 
-def make_ttt_apply(model_config, distogram: bool = False):
+def make_ttt_apply(
+    model_config,
+    distogram: bool = False,
+    keep_structure: bool = False,
+):
     """Create a JIT-compiled apply function for TTT.
 
     Uses the real ``AlphaFold`` module (guaranteeing param-path compatibility)
     but with a modified config:
       - ``num_recycle = 0``  (single Evoformer pass, no recycling loop)
       - All head weights zeroed except ``masked_msa``
-        (and optionally ``distogram`` for consistency loss)
+        (and optionally ``distogram`` for consistency loss; and optionally
+        ``structure_module`` + ``predicted_lddt`` when ``keep_structure``)
         → structure module is never instantiated (modules.py line 216-217)
 
     Args:
         model_config: AF2 model config (``config.model``).
         distogram: If True, also keep the distogram head active so
             its logits are available for the consistency loss.
+        keep_structure: If True, keep ``structure_module`` and
+            ``predicted_lddt`` heads active so the forward produces
+            predicted LDDT logits. Makes TTT steps markedly slower but
+            lets a structure-aware loss propagate gradients to the
+            structure module weights.
 
     Returns:
         ``apply_fn(params, rng, batch) -> output_dict``
@@ -60,6 +71,9 @@ def make_ttt_apply(model_config, distogram: bool = False):
     keep_heads = {'masked_msa'}
     if distogram:
         keep_heads.add('distogram')
+    if keep_structure:
+        keep_heads.add('structure_module')
+        keep_heads.add('predicted_lddt')
 
     cfg = copy.deepcopy(model_config)
     with cfg.unlocked():
@@ -196,6 +210,7 @@ def remask_msa_jax(
     profile_prob: float = 0.1,
     same_prob: float = 0.1,
     block_mask: bool = False,
+    mask_query_only: bool = False,
 ) -> Dict[str, Any]:
     """Re-mask the MSA in pure JAX, replicating ``make_masked_msa``.
 
@@ -214,6 +229,13 @@ def remask_msa_jax(
         block_mask: If True, mask entire residue columns uniformly across all
             sequences (Exp 8). Forces the pair representation to carry the
             prediction signal rather than neighbouring MSA rows.
+        mask_query_only: If True, mask only the query row (row 0); homolog
+            rows stay intact and act as evolutionary context. Removes the
+            "copy from another row at the same column" shortcut and asks
+            the model to predict the query's masked positions from MSA
+            context — analogous to ProteinTTT's per-row MLM.
+            Mutually exclusive with ``block_mask``; if both are set,
+            ``mask_query_only`` wins.
 
     Returns:
         Shallow-copied batch with updated ``'bert_mask'`` and ``'msa_feat'``.
@@ -225,7 +247,12 @@ def remask_msa_jax(
     rng_pos, rng_cat = jax.random.split(rng)
 
     # 1) Select positions to mask
-    if block_mask:
+    if mask_query_only:
+        # Mask only row 0 (the query); leave homologs intact as context.
+        row0_mask = jax.random.uniform(rng_pos, (n_res,)) < replace_fraction
+        mask_position = jnp.zeros((n_seq, n_res), dtype=jnp.bool_)
+        mask_position = mask_position.at[0].set(row0_mask)
+    elif block_mask:
         # Mask entire residue columns — same mask broadcast across all sequences
         mask_cols = jax.random.uniform(rng_pos, (n_res,)) < replace_fraction
         mask_position = jnp.broadcast_to(mask_cols[None, :], (n_seq, n_res))
@@ -489,6 +516,56 @@ def ttt_finetune_loss_fn(
     )
 
 
+def _expected_plddt(lddt_logits: jnp.ndarray) -> jnp.ndarray:
+    """Mean expected pLDDT (in [0,100]) from predicted_lddt logits.
+
+    Replicates ``alphafold.common.confidence.compute_plddt`` but keeps the
+    computation differentiable (softmax instead of argmax).
+    """
+    num_bins = lddt_logits.shape[-1]
+    bin_width = 1.0 / num_bins
+    bin_centers = (
+        jnp.arange(num_bins, dtype=lddt_logits.dtype) * bin_width
+        + 0.5 * bin_width
+    )
+    probs = jax.nn.softmax(lddt_logits, axis=-1)
+    per_res = jnp.sum(probs * bin_centers, axis=-1) * 100.0
+    return jnp.mean(per_res)
+
+
+def ttt_finetune_plddt_loss_fn(
+    trainable: Dict[str, jnp.ndarray],
+    base_params: Dict[str, Dict[str, Any]],
+    ft_meta: Dict[str, Dict[str, int]],
+    apply_fn,
+    num_output: int,
+    batch: Dict[str, Any],
+    rng: jnp.ndarray,
+    mlm_weight: float,
+    plddt_weight: float,
+) -> jnp.ndarray:
+    """MLM loss minus weighted expected pLDDT, with fine-tuned params.
+
+    Requires ``apply_fn`` built with ``keep_structure=True`` so that
+    ``output['predicted_lddt']['logits']`` is available. Gradients flow
+    through the structure module into the Evoformer weights.
+    """
+    merged_params = merge_finetune_into_params(base_params, trainable, ft_meta)
+    output = apply_fn(merged_params, rng, batch)
+    logits = output['masked_msa']['logits']
+    batch_sq = jax.tree.map(lambda x: x[0] if x.ndim > 0 else x, batch)
+    errors = softmax_cross_entropy(
+        labels=jax.nn.one_hot(batch_sq['true_msa'], num_classes=num_output),
+        logits=logits,
+    )
+    mlm = jnp.sum(errors * batch_sq['bert_mask'], axis=(-2, -1)) / (
+        1e-8 + jnp.sum(batch_sq['bert_mask'], axis=(-2, -1))
+    )
+    plddt_mean = _expected_plddt(output['predicted_lddt']['logits'])
+    # Loss in [0,1]-ish: subtract normalised pLDDT so higher pLDDT lowers loss.
+    return mlm_weight * mlm - plddt_weight * (plddt_mean / 100.0)
+
+
 def ttt_finetune_consistency_loss_fn(
     trainable: Dict[str, jnp.ndarray],
     base_params: Dict[str, Dict[str, Any]],
@@ -563,6 +640,9 @@ def run_ttt(
     distogram_consistency: bool = False,
     lambda_pair: float = 0.1,
     full_finetune: bool = False,
+    plddt_loss_weight: float = 0.0,
+    mlm_loss_weight: float = 1.0,
+    mask_query_only: bool = False,
 ) -> Tuple[Dict[str, Dict[str, Any]], List[float], List[Dict[str, Any]], int]:
     """Run test-time training and return adapted parameters.
 
@@ -620,6 +700,18 @@ def run_ttt(
             if pk in prev:
                 batch_squeezed[pk] = prev[pk]
         logger.info('Injecting frozen prev conditioning into TTT batch')
+    else:
+        logger.info('No prev conditioning: Evoformer will see zero prev_* '
+                    '(same as fresh recycle iteration 0)')
+
+    if mask_query_only:
+        mask_mode = 'query-only (row 0; homologs intact as context)'
+    elif block_mask:
+        mask_mode = 'block (whole columns; broadcast across rows)'
+    else:
+        mask_mode = 'per-cell (independent across rows and columns)'
+    logger.info('MSA masking mode: %s, replace_fraction=%.3f',
+                mask_mode, replace_fraction)
 
     # --- 2. init trainable params --------------------------------------------
     if full_finetune:
@@ -658,6 +750,15 @@ def run_ttt(
         optimizer = optax.adam(schedule)
     opt_state = optimizer.init(trainable)
 
+    # Log the LR schedule for the first few steps — optax counts updates
+    # from 0, so step 1 of the training loop uses schedule(0).
+    sched_preview = [float(schedule(k)) for k in range(min(6, num_steps))]
+    logger.info(
+        'LR schedule (step_index -> lr): %s (warmup_steps=%d, peak=%g)',
+        ', '.join(f'{k}->{v:.3g}' for k, v in enumerate(sched_preview)),
+        warmup_steps, learning_rate,
+    )
+
     # --- 4. JIT-compiled step ------------------------------------------------
     def _make_masked_batch(batch_sq, rng_k):
         """Subsample + remask → add ensemble dim."""
@@ -665,16 +766,29 @@ def run_ttt(
         b = subsample_msa_jax(batch_sq, sample_rng, msa_sample_size) \
             if msa_sample_size is not None else batch_sq
         masked = remask_msa_jax(b, mask_rng, replace_fraction=replace_fraction,
-                                block_mask=block_mask)
+                                block_mask=block_mask,
+                                mask_query_only=mask_query_only)
         return jax.tree.map(lambda x: x[None], masked)
 
     # Mode-specific loss closures (captured by the JIT step function below).
     # This avoids duplicating the accumulation logic for LoRA vs full FT.
     if full_finetune:
-        def _raw_loss(trainable, batch, rng):
-            return ttt_finetune_loss_fn(
-                trainable, base_params, ft_meta,
-                apply_fn, num_output, batch, rng)
+        if plddt_loss_weight > 0.0:
+            def _raw_loss(trainable, batch, rng):
+                return ttt_finetune_plddt_loss_fn(
+                    trainable, base_params, ft_meta,
+                    apply_fn, num_output, batch, rng,
+                    mlm_loss_weight, plddt_loss_weight)
+            logger.info(
+                'TTT loss = %.3f*MLM - %.3f*(E[pLDDT]/100) '
+                '(requires keep_structure apply_fn)',
+                mlm_loss_weight, plddt_loss_weight,
+            )
+        else:
+            def _raw_loss(trainable, batch, rng):
+                return ttt_finetune_loss_fn(
+                    trainable, base_params, ft_meta,
+                    apply_fn, num_output, batch, rng)
 
         def _raw_cons_loss(trainable, b1, b2, rng):
             return ttt_finetune_consistency_loss_fn(
@@ -824,5 +938,60 @@ def run_ttt(
         adapted_params = _merge_trainable(best_trainable)
     else:
         adapted_params = _merge_trainable(trainable)
+
+    # --- 7. weight-delta diagnostics ----------------------------------------
+    # Report deltas for two snapshots:
+    #   * final   = weights after the last TTT step
+    #   * best    = weights from the best-pLDDT step (what we actually return)
+    # When best_step=0 the "best" snapshot is just base_params → ||Δ||=0 by
+    # construction; the "final" snapshot is what reveals whether updates
+    # actually happened during training.
+    def _log_ft_deltas(label: str, snapshot: Dict[str, jnp.ndarray]) -> None:
+        deltas: List[Tuple[str, float, float]] = []
+        base_sq = 0.0
+        for key, slice_ in snapshot.items():
+            scope, name = key.split('//')
+            start = ft_meta[key]['start']
+            base_slice = base_params[scope][name][start:]
+            diff = slice_ - base_slice
+            abs_norm = float(jnp.linalg.norm(diff))
+            base_norm_val = float(jnp.linalg.norm(base_slice))
+            base_sq += base_norm_val * base_norm_val
+            deltas.append((key, abs_norm, abs_norm / (base_norm_val + 1e-12)))
+        total_abs_sq = sum(d[1] * d[1] for d in deltas)
+        total_abs = float(total_abs_sq ** 0.5)
+        total_base = (base_sq ** 0.5) + 1e-12
+        logger.info(
+            'Weight delta [%s]: total ||Δ||=%.4g, ||Δ||/||W||=%.3e across %d targets',
+            label, total_abs, total_abs / total_base, len(deltas),
+        )
+        deltas.sort(key=lambda x: x[2], reverse=True)
+        for key, abs_n, rel_n in deltas[:10]:
+            logger.info('  top Δ [%s] %s  ||Δ||=%.3e  rel=%.3e',
+                        label, key, abs_n, rel_n)
+
+    def _log_lora_deltas(label: str, snapshot: Dict[str, Dict[str, jnp.ndarray]]) -> None:
+        lora_now = update_lora_from_trainable(lora_meta, snapshot)
+        total = 0.0
+        worst: List[Tuple[str, float]] = []
+        for key, v in lora_now.items():
+            delta_w = _compute_delta(v['A'], v['B'], alpha, rank, v['orig_shape'])
+            d = float(jnp.linalg.norm(delta_w))
+            total += d
+            worst.append((key, d))
+        logger.info('LoRA delta [%s]: total ||Δ||=%.4g across %d targets',
+                    label, total, len(lora_now))
+        worst.sort(key=lambda x: x[1], reverse=True)
+        for key, d in worst[:10]:
+            logger.info('  top Δ [%s] %s  ||Δ||=%.3e', label, key, d)
+
+    if full_finetune:
+        _log_ft_deltas('final', trainable)
+        if best_trainable is not None and best_step != num_steps:
+            _log_ft_deltas('best', best_trainable)
+    else:
+        _log_lora_deltas('final', trainable)
+        if best_trainable is not None and best_step != num_steps:
+            _log_lora_deltas('best', best_trainable)
 
     return adapted_params, losses, eval_logs, best_step

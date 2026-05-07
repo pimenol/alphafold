@@ -232,6 +232,12 @@ def main() -> int:
     parser.add_argument('--block_mask', action='store_true',
                         help='Exp 8: mask entire residue columns across all '
                              'sequences instead of independent per-position masking.')
+    parser.add_argument('--mask_query_only', action='store_true',
+                        help='Mask only the query row (row 0); leave homolog '
+                             'rows intact as evolutionary context. Removes '
+                             'the "copy from neighbouring row" shortcut. '
+                             'Mutually exclusive with --block_mask; if both '
+                             'set, --mask_query_only wins.')
     parser.add_argument('--distogram_consistency', action='store_true',
                         help='Exp 9: add distogram consistency loss (symmetric '
                              'KL between two differently-masked views). '
@@ -246,6 +252,18 @@ def main() -> int:
     parser.add_argument('--ttt_prev_num_recycle', type=int, default=None,
                         help='Number of recycling iterations for computing '
                              'prev features. None = use model default (3).')
+    parser.add_argument('--plddt_loss_weight', type=float, default=0.0,
+                        help='Weight λ for structure-aware loss term '
+                             '-λ*(E[pLDDT]/100). Nonzero keeps '
+                             'structure_module + predicted_lddt heads '
+                             'active during TTT so gradients flow through '
+                             'the structure module (slower). Diagnostic '
+                             'for whether the gradient path to pLDDT works.')
+    parser.add_argument('--mlm_loss_weight', type=float, default=1.0,
+                        help='Weight for the masked-MSA loss term when '
+                             '--plddt_loss_weight > 0. Set to 0 to drive '
+                             'purely by pLDDT (may collapse to confident '
+                             'garbage — diagnostic only).')
     parser.add_argument('--mask_fraction', type=float, default=0.15)
     parser.add_argument('--ttt_msa_clusters', type=int, default=None,
                         help='Subsample this many MSA rows per TTT step. '
@@ -329,7 +347,8 @@ def main() -> int:
             ttt_config.data.eval.crop_size = args.ttt_crop_size
 
     ttt_apply = make_ttt_apply(ttt_config.model,
-                               distogram=args.distogram_consistency)
+                               distogram=args.distogram_consistency,
+                               keep_structure=args.plddt_loss_weight > 0.0)
 
     # Eval config: full model (all heads) but no recycling for speed
     eval_config = None
@@ -496,6 +515,9 @@ def main() -> int:
                 distogram_consistency=args.distogram_consistency,
                 lambda_pair=args.lambda_pair,
                 full_finetune=args.full_finetune,
+                plddt_loss_weight=args.plddt_loss_weight,
+                mlm_loss_weight=args.mlm_loss_weight,
+                mask_query_only=args.mask_query_only,
             )
             ttt_time = time.time() - t0
             best_info = f', best_step={best_step}' if best_step >= 0 else ''

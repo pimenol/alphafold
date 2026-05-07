@@ -1,0 +1,46 @@
+# Diagnostic C: structure-aware loss only, to confirm the gradient path
+# from trainable weights -> structure module -> predicted_lddt works.
+# Uses -E[pLDDT]/100 as loss. MLM weight = 0.
+
+slurm:
+  time: "02:00:00"   # structure module active -> slower steps
+  gpus: 1
+  cpus_per_task: 8
+  partition: qgpu
+  account: OPEN-35-8
+
+model_name: model_1_ptm
+
+ttt_steps: 10
+ttt_lr: 1e-1
+last_n_blocks: 24
+optimizer: "sgd"
+
+ttt_msa_clusters: 4
+ttt_crop_size: 1024
+eval_interval: 1
+max_extra_msa: 0
+
+full_finetune: true
+lora_triangle_attention: false
+distogram_consistency: false
+lambda_pair: 0.1
+
+grad_accum_steps: 1
+block_mask: false
+ttt_recycle_prev: true
+ttt_prev_num_recycle: 3
+mask_fraction: 0.15
+
+plddt_loss_weight: 1.0
+mlm_loss_weight: 0.0
+
+msa_dir: /scratch/project/open-35-8/data/bfvd/bfvd_beta/input/logan
+benchmark_csv: /scratch/project/open-35-8/pimenol1/alphafold/data/bfvd/summary.csv
+output_dir: /scratch/project/open-35-8/pimenol1/alphafold/evottt_outputs/diag
+
+protein_ids: "Q98576"
+seed: 0
+
+skip_existing: false
+skip_baseline: false

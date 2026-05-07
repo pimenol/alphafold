@@ -65,6 +65,8 @@ mapping = {
     'optimizer': 'OPTIMIZER', 'grad_accum_steps': 'GRAD_ACCUM_STEPS',
     'lambda_pair': 'LAMBDA_PAIR',
     'ttt_prev_num_recycle': 'TTT_PREV_NUM_RECYCLE',
+    'plddt_loss_weight': 'PLDDT_LOSS_WEIGHT',
+    'mlm_loss_weight': 'MLM_LOSS_WEIGHT',
 }
 bool_mapping = {
     'skip_existing': 'SKIP_EXISTING',
@@ -72,6 +74,7 @@ bool_mapping = {
     'full_finetune': 'FULL_FINETUNE',
     'lora_triangle_attention': 'LORA_TRIANGLE_ATTENTION',
     'block_mask': 'BLOCK_MASK',
+    'mask_query_only': 'MASK_QUERY_ONLY',
     'ttt_recycle_prev': 'TTT_RECYCLE_PREV',
     'distogram_consistency': 'DISTOGRAM_CONSISTENCY',
 }
@@ -112,6 +115,8 @@ TTT_RECYCLE_PREV="${TTT_RECYCLE_PREV:-}"
 TTT_PREV_NUM_RECYCLE="${TTT_PREV_NUM_RECYCLE:-}"
 DISTOGRAM_CONSISTENCY="${DISTOGRAM_CONSISTENCY:-}"
 LAMBDA_PAIR="${LAMBDA_PAIR:-0.1}"
+PLDDT_LOSS_WEIGHT="${PLDDT_LOSS_WEIGHT:-0.0}"
+MLM_LOSS_WEIGHT="${MLM_LOSS_WEIGHT:-1.0}"
 
 # ---- MSA generation (optional, for single-sequence input) ----
 JACKHMMER_BIN="${JACKHMMER_BIN:-}"
@@ -218,6 +223,10 @@ if [[ "${BLOCK_MASK:-}" == "true" ]]; then
   CMD+=(--block_mask)
 fi
 
+if [[ "${MASK_QUERY_ONLY:-}" == "true" ]]; then
+  CMD+=(--mask_query_only)
+fi
+
 if [[ "${TTT_RECYCLE_PREV:-}" == "true" ]]; then
   CMD+=(--ttt_recycle_prev)
 fi
@@ -225,6 +234,9 @@ fi
 if [[ -n "${TTT_PREV_NUM_RECYCLE}" ]]; then
   CMD+=(--ttt_prev_num_recycle "${TTT_PREV_NUM_RECYCLE}")
 fi
+
+CMD+=(--plddt_loss_weight "${PLDDT_LOSS_WEIGHT}"
+      --mlm_loss_weight "${MLM_LOSS_WEIGHT}")
 
 if [[ -n "${JACKHMMER_BIN}" && -n "${SEQ_DATABASE}" ]]; then
   CMD+=(--jackhmmer_binary_path "${JACKHMMER_BIN}"
