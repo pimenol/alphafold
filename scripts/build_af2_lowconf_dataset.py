@@ -588,6 +588,10 @@ def stage_verify() -> None:
     _, seqs = base.parse_a3m(open(msa_path).read())
     check(seqs and seqs[0] == sequence,
           f'{target}: first a3m row is not the query sequence')
+    allowed = set('ABCDEFGHIJKLMNOPQRSTUVWXYZ-') | set('abcdefghijklmnopqrstuvwxyz')
+    stray = {c for s in seqs for c in s} - allowed
+    check(not stray, f'{target}: a3m has characters AlphaFold cannot encode: '
+                     f'{sorted(repr(c) for c in stray)}')
     check(int(row['msa_depth']) == len(seqs),
           f'{target}: msa_depth disagrees with the a3m')
 

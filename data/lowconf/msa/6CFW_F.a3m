@@ -5081,7 +5081,7 @@ MRRGaaPGPVLSVLVHGLVPMMILVACYLLWAGAHAPGGAFQAGL-----------------------------------
 >SRR6478672_6372412	39	0.404	9.628E+00	2	43	148	61	101	103
 --RGMTVVVRSGVRLVLPVLTVGGCYLVAWG-YSPGGGFPAGAV--------------------------------------------------------------------------------------------------------
 >SRR3954468_339749	39	0.461	9.628E+00	1	39	148	156	194	195
--PAGASQTIRAICVALTGPVLVLGAYIVAHGALTPGGGFQ------------------------------------------------------------------------------------------------------------ 
+-PAGASQTIRAICVALTGPVLVLGAYIVAHGALTPGGGFQ------------------------------------------------------------------------------------------------------------
 >UniRef100_F4HNG2	164	0.850	5.149E-43	0	146	148	0	146	148
 MSDDMGVIVKTNARALIPLIGIFGAYIVLHGHLTPGGGFQGGATIVGTGLLFLIAFGVEEAKKVINKDLYSALEGVGGLIFLGAAMLGLSIAFFYNVLWHKGPIFNGKPGTLLSAGFLPIMNLGVGLKVFTGLVSAVFALSLFRRWK-
 >UniRef100_A0A8J8A9F2	164	0.777	7.059E-43	0	147	148	0	147	148
@@ -12865,4 +12865,4 @@ MPGSRlhnDPMLQWLVRLLAPVMMLAGGYLLWLGTSAPGGAFHAGAMLAAAGVILRMA----------------------
 >UniRef100_A0A2W5WSV9	40	0.351	5.414E+00	1	54	148	171	224	304
 -PDPVPAPVTALARVLLPALVLLGTWLLLAGTSRPGGAFQAGAMFAGALVVAFVA---------------------------------------------------------------------------------------------
 >UniRef100_A0A2N1D822	39	0.357	7.335E+00	12	53	148	110	151	229
-------------VKVLAPLTILLAGYTLWVGSFKPGGAFQAGALLAGCGLLLSL---------------------------------------------------------------------------------------------- 
+------------VKVLAPLTILLAGYTLWVGSFKPGGAFQAGALLAGCGLLLSL----------------------------------------------------------------------------------------------

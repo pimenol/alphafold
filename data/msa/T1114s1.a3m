@@ -467,7 +467,7 @@ MTANGQ---------VLEASPADQVRAKLDDPRVAESLNNLLEHADLLAVLVSGLDGLLRRSDVIGESLASAIGDFKgdA
 >MGYP000390829198	40	0.320	5.836E+00	32	81	189	1	50	77
 --------------------------------KTIGSLKALIERLELAVFTLEALDGWLRRGDDIAQALAEGAGDLREAMPT-----------------------------------------------------------------------------------------------------------
 >SRR5690349_12894760	40	0.510	7.838E+00	39	81	189	0	42	250
----------------------------------------TLLDHADLLAISVVALDGLVGRSEVIGDALVSGFDELRDLADA----------------------------------------------------------------------------------------------------------- 
+---------------------------------------TLLDHADLLAISVVALDGLVGRSEVIGDALVSGFDELRDLADA-----------------------------------------------------------------------------------------------------------
 >UniRef100_A0A2U9PNA8	214	0.978	2.393E-59	0	188	189	0	189	190
 MASNGHSAGQNAIDELPDISPADGIRRRLDDPQVAEALNSLLDHADLLAVLVKGLDGFVRRGDDIANNLTSAIGELKALNAADTPIPALAAFKDVDLAGLANSLATLSGGLVKATPALNAVLDSpLTDQRGAEVLSALGGALVAARTSAPPAPRGVRGMWKTLRAAAKDPDVGRGVSYLIEVARVFGSKV
 >UniRef100_A0A4Z0MZU5	158	0.557	4.578E-40	16	188	189	7	178	181
@@ -964,5 +964,3 @@ MATHAALAVSSEGDELIEDSPGDELIQRLYDPQVAASLGVILDHADLLATVIQGLDGMLRRADVISD-------------
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------LMKTLNDPDINRAIGFGVHFLKGMGKEL
 >UniRef100_A0A7U6H4E9	40	0.250	8.087E+00	161	188	189	128	155	158
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------LMKTLNDPDINRAIGFGIHFLKGMGKEL
->UniRef100_UPI00207B0723	40	0.214	8.087E+00	161	188	189	128	155	158
------------------------------------------------------------------------------------------------------------------------------------------------------------------LMKTLNDPDINRAIGFGVHFLKGMGKEL 

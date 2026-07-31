@@ -1,0 +1,117 @@
+<style>
+:root { --bg:#ffffff; --fg:#1a1a1a; --muted:#666; --line:#e2e2e2;
+        --head:#f6f7f9; --up:#0a7c42; --down:#b3261e; --accent:#2b5c8a; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#14161a; --fg:#e8e8e8; --muted:#9aa0a6; --line:#2c3038;
+          --head:#1c1f25; --up:#4ade80; --down:#f87171; --accent:#7aa7d1; }
+}
+* { box-sizing: border-box; }
+body { margin:0; padding:2rem 1.25rem 4rem; background:var(--bg); color:var(--fg);
+       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+main { max-width: 1180px; margin: 0 auto; }
+h1 { font-size:1.7rem; margin:0 0 .35rem; letter-spacing:-.01em; }
+h2 { font-size:1.2rem; margin:2.5rem 0 .4rem; letter-spacing:-.01em; }
+.sub { color:var(--muted); margin:0 0 1.5rem; }
+.blurb { color:var(--muted); margin:.2rem 0 1rem; max-width:70ch; }
+.note { color:var(--muted); font-style:italic; }
+.stats { display:flex; flex-wrap:wrap; gap:.6rem; margin:1rem 0 1.2rem; }
+.stat { border:1px solid var(--line); border-radius:8px; padding:.55rem .8rem;
+        min-width:8.5rem; background:var(--head); }
+.stat .v { display:block; font-size:1.25rem; font-weight:600;
+           font-variant-numeric:tabular-nums; }
+.stat .k { display:block; font-size:.74rem; color:var(--muted); }
+.tablewrap { overflow-x:auto; border:1px solid var(--line); border-radius:8px; }
+table { border-collapse:collapse; width:100%; font-size:13.5px; }
+th, td { padding:.42rem .6rem; border-bottom:1px solid var(--line);
+         text-align:left; white-space:nowrap; }
+thead th { background:var(--head); font-weight:600; position:sticky; top:0; }
+th.grp { text-align:center; border-left:1px solid var(--line); }
+td.num, th { font-variant-numeric:tabular-nums; }
+td.num { text-align:right; }
+td.id { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+tbody tr:hover { background:var(--head); }
+tr.missing td { color:var(--muted); }
+.up { color:var(--up); font-weight:600; }
+.down { color:var(--down); font-weight:600; }
+.flat { color:var(--muted); }
+.caveats { margin-top:2.5rem; border-top:1px solid var(--line); padding-top:1.2rem; }
+.caveats li { margin:.4rem 0; max-width:80ch; }
+code { background:var(--head); padding:.1rem .3rem; border-radius:4px;
+       font-size:.9em; }
+</style>
+<main>
+<h1>AlphaFold 2 baseline run</h1>
+<p class="sub">Both benchmark datasets predicted with <code>model_1_ptm</code>,
+using the MSAs the datasets ship and no templates. Generated 2026-07-31.</p>
+
+<section>
+  <h2>Confidently wrong, deep MSA (CASP15)</h2>
+  <p class="blurb">CASP15 targets released after the 2021-09-30 training cutoff of the released v2.3 parameters, so they are blind. The baseline columns are the Prediction Center&rsquo;s published numbers for the standard AlphaFold2 server.</p>
+  <div class="stats"><div class="stat"><span class="v">13/13</span><span class="k">predicted</span></div><div class="stat"><span class="v">-0.02</span><span class="k">mean &Delta;TM vs baseline</span></div><div class="stat"><span class="v">-0.01</span><span class="k">mean &Delta;lDDT</span></div><div class="stat"><span class="v">2</span><span class="k">improved (&Delta;TM &gt; 0.05)</span></div><div class="stat"><span class="v">4</span><span class="k">regressed (&Delta;TM &lt; -0.05)</span></div><div class="stat"><span class="v">13</span><span class="k">still below TM 0.8</span></div></div>
+  <div class="tablewrap">
+  <table>
+    <thead>
+      <tr>
+        <th rowspan="2">id</th><th rowspan="2">len</th><th rowspan="2">Neff</th>
+        <th colspan="3" class="grp">CASP15 group 270 (published)</th>
+        <th colspan="3" class="grp">this run (MSA-only, no templates)</th>
+        <th colspan="2" class="grp">change</th>
+        <th rowspan="2">pTM</th>
+      </tr>
+      <tr>
+        <th>pLDDT</th><th>lDDT</th><th>TM</th>
+        <th>pLDDT</th><th>lDDT</th><th>TM</th>
+        <th>&Delta;lDDT</th><th>&Delta;TM</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="id">T1137s4</td><td class="num">547</td><td class="num">3031</td><td class="num">76.2</td><td class="num">0.80</td><td class="num">0.34</td><td class="num">82.2</td><td class="num">0.79</td><td class="num">0.31</td><td class="num flat">-0.01</td><td class="num down">-0.03</td><td class="num">0.39</td></tr><tr><td class="id">T1137s1</td><td class="num">409</td><td class="num">1420</td><td class="num">86.4</td><td class="num">0.79</td><td class="num">0.41</td><td class="num">83.3</td><td class="num">0.78</td><td class="num">0.36</td><td class="num flat">-0.01</td><td class="num down">-0.05</td><td class="num">0.43</td></tr><tr><td class="id">T1137s3</td><td class="num">524</td><td class="num">2186</td><td class="num">80.5</td><td class="num">0.84</td><td class="num">0.41</td><td class="num">79.8</td><td class="num">0.82</td><td class="num">0.43</td><td class="num flat">-0.02</td><td class="num flat">+0.02</td><td class="num">0.35</td></tr><tr><td class="id">T1137s6</td><td class="num">518</td><td class="num">2926</td><td class="num">85.3</td><td class="num">0.83</td><td class="num">0.41</td><td class="num">85.7</td><td class="num">0.82</td><td class="num">0.40</td><td class="num flat">-0.01</td><td class="num flat">-0.01</td><td class="num">0.37</td></tr><tr><td class="id">T1114s1</td><td class="num">189</td><td class="num">245</td><td class="num">80.6</td><td class="num">0.81</td><td class="num">0.43</td><td class="num">77.6</td><td class="num">0.74</td><td class="num">0.31</td><td class="num down">-0.07</td><td class="num down">-0.12</td><td class="num">0.34</td></tr><tr><td class="id">T1137s2</td><td class="num">343</td><td class="num">5272</td><td class="num">86.4</td><td class="num">0.84</td><td class="num">0.43</td><td class="num">87.3</td><td class="num">0.83</td><td class="num">0.42</td><td class="num flat">-0.01</td><td class="num flat">-0.01</td><td class="num">0.47</td></tr><tr><td class="id">T1137s5</td><td class="num">390</td><td class="num">2536</td><td class="num">85.5</td><td class="num">0.83</td><td class="num">0.43</td><td class="num">86.2</td><td class="num">0.83</td><td class="num">0.46</td><td class="num flat">-0.00</td><td class="num up">+0.03</td><td class="num">0.45</td></tr><tr><td class="id">T1173</td><td class="num">204</td><td class="num">7593</td><td class="num">78.2</td><td class="num">0.53</td><td class="num">0.47</td><td class="num">72.0</td><td class="num">0.48</td><td class="num">0.56</td><td class="num down">-0.05</td><td class="num up">+0.09</td><td class="num">0.48</td></tr><tr><td class="id">T1174</td><td class="num">338</td><td class="num">6885</td><td class="num">76.8</td><td class="num">0.66</td><td class="num">0.56</td><td class="num">73.7</td><td class="num">0.70</td><td class="num">0.49</td><td class="num up">+0.04</td><td class="num down">-0.07</td><td class="num">0.60</td></tr><tr><td class="id">T1157s2</td><td class="num">495</td><td class="num">17956</td><td class="num">93.7</td><td class="num">0.78</td><td class="num">0.64</td><td class="num">90.6</td><td class="num">0.76</td><td class="num">0.71</td><td class="num down">-0.02</td><td class="num up">+0.07</td><td class="num">0.55</td></tr><tr><td class="id">T1121</td><td class="num">381</td><td class="num">614</td><td class="num">92.1</td><td class="num">0.80</td><td class="num">0.74</td><td class="num">90.8</td><td class="num">0.79</td><td class="num">0.76</td><td class="num flat">-0.01</td><td class="num up">+0.02</td><td class="num">0.63</td></tr><tr><td class="id">T1115</td><td class="num">288</td><td class="num">10467</td><td class="num">90.9</td><td class="num">0.79</td><td class="num">0.75</td><td class="num">89.3</td><td class="num">0.79</td><td class="num">0.73</td><td class="num flat">+0.00</td><td class="num flat">-0.02</td><td class="num">0.65</td></tr><tr><td class="id">T1180</td><td class="num">404</td><td class="num">10519</td><td class="num">93.7</td><td class="num">0.83</td><td class="num">0.77</td><td class="num">94.0</td><td class="num">0.81</td><td class="num">0.64</td><td class="num down">-0.02</td><td class="num down">-0.13</td><td class="num">0.67</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+<section>
+  <h2>Wrong and unconfident (AlphaFold DB &times; PDB)</h2>
+  <p class="blurb">Chains where the deposited AlphaFold DB model has pLDDT &lt; 70 and lDDT &lt; 0.7. These are <strong>not</strong> blind: most of these PDB entries predate the training cutoff.</p>
+  <div class="stats"><div class="stat"><span class="v">25/25</span><span class="k">predicted</span></div><div class="stat"><span class="v">+0.01</span><span class="k">mean &Delta;TM vs baseline</span></div><div class="stat"><span class="v">+0.01</span><span class="k">mean &Delta;lDDT</span></div><div class="stat"><span class="v">10</span><span class="k">improved (&Delta;TM &gt; 0.05)</span></div><div class="stat"><span class="v">7</span><span class="k">regressed (&Delta;TM &lt; -0.05)</span></div><div class="stat"><span class="v">22</span><span class="k">still below TM 0.8</span></div></div>
+  <div class="tablewrap">
+  <table>
+    <thead>
+      <tr>
+        <th rowspan="2">id</th><th rowspan="2">len</th><th rowspan="2">Neff</th>
+        <th colspan="3" class="grp">AlphaFold DB model</th>
+        <th colspan="3" class="grp">this run (MSA-only, no templates)</th>
+        <th colspan="2" class="grp">change</th>
+        <th rowspan="2">pTM</th>
+      </tr>
+      <tr>
+        <th>pLDDT</th><th>lDDT</th><th>TM</th>
+        <th>pLDDT</th><th>lDDT</th><th>TM</th>
+        <th>&Delta;lDDT</th><th>&Delta;TM</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="id">8V1J_A</td><td class="num">116</td><td class="num">2</td><td class="num">32.3</td><td class="num">0.20</td><td class="num">0.14</td><td class="num">32.0</td><td class="num">0.19</td><td class="num">0.20</td><td class="num flat">-0.01</td><td class="num up">+0.06</td><td class="num">0.20</td></tr><tr><td class="id">4ZKQ_A</td><td class="num">412</td><td class="num">1</td><td class="num">25.4</td><td class="num">0.14</td><td class="num">0.17</td><td class="num">25.5</td><td class="num">0.18</td><td class="num">0.23</td><td class="num up">+0.04</td><td class="num up">+0.06</td><td class="num">0.23</td></tr><tr><td class="id">7ZKD_A</td><td class="num">88</td><td class="num">4</td><td class="num">41.7</td><td class="num">0.28</td><td class="num">0.20</td><td class="num">41.6</td><td class="num">0.30</td><td class="num">0.30</td><td class="num up">+0.03</td><td class="num up">+0.10</td><td class="num">0.20</td></tr><tr><td class="id">2CME_A</td><td class="num">90</td><td class="num">2</td><td class="num">44.3</td><td class="num">0.31</td><td class="num">0.23</td><td class="num">37.2</td><td class="num">0.30</td><td class="num">0.22</td><td class="num flat">-0.02</td><td class="num flat">-0.01</td><td class="num">0.26</td></tr><tr><td class="id">2N7P_A</td><td class="num">103</td><td class="num">4611</td><td class="num">47.8</td><td class="num">0.30</td><td class="num">0.26</td><td class="num">81.5</td><td class="num">0.48</td><td class="num">0.54</td><td class="num up">+0.18</td><td class="num up">+0.28</td><td class="num">0.66</td></tr><tr><td class="id">6OEE_A</td><td class="num">280</td><td class="num">50</td><td class="num">60.2</td><td class="num">0.51</td><td class="num">0.30</td><td class="num">52.0</td><td class="num">0.63</td><td class="num">0.38</td><td class="num up">+0.13</td><td class="num up">+0.09</td><td class="num">0.38</td></tr><tr><td class="id">8FW5_H</td><td class="num">117</td><td class="num">1</td><td class="num">58.9</td><td class="num">0.35</td><td class="num">0.30</td><td class="num">41.7</td><td class="num">0.33</td><td class="num">0.29</td><td class="num flat">-0.02</td><td class="num flat">-0.01</td><td class="num">0.36</td></tr><tr><td class="id">7AD5_A</td><td class="num">122</td><td class="num">3</td><td class="num">41.5</td><td class="num">0.33</td><td class="num">0.36</td><td class="num">42.7</td><td class="num">0.27</td><td class="num">0.24</td><td class="num down">-0.05</td><td class="num down">-0.13</td><td class="num">0.39</td></tr><tr><td class="id">5M86_A</td><td class="num">324</td><td class="num">60</td><td class="num">51.4</td><td class="num">0.45</td><td class="num">0.45</td><td class="num">81.6</td><td class="num">0.71</td><td class="num">0.90</td><td class="num up">+0.26</td><td class="num up">+0.45</td><td class="num">0.82</td></tr><tr><td class="id">1YDU_A</td><td class="num">169</td><td class="num">313</td><td class="num">66.0</td><td class="num">0.47</td><td class="num">0.46</td><td class="num">64.0</td><td class="num">0.48</td><td class="num">0.46</td><td class="num flat">+0.00</td><td class="num flat">+0.00</td><td class="num">0.49</td></tr><tr><td class="id">7DDQ_X</td><td class="num">83</td><td class="num">56</td><td class="num">63.4</td><td class="num">0.59</td><td class="num">0.48</td><td class="num">64.5</td><td class="num">0.58</td><td class="num">0.57</td><td class="num flat">-0.01</td><td class="num up">+0.09</td><td class="num">0.33</td></tr><tr><td class="id">2GFP_A</td><td class="num">375</td><td class="num">4630</td><td class="num">68.4</td><td class="num">0.34</td><td class="num">0.51</td><td class="num">63.9</td><td class="num">0.34</td><td class="num">0.50</td><td class="num flat">-0.00</td><td class="num flat">-0.01</td><td class="num">0.64</td></tr><tr><td class="id">9SLR_A</td><td class="num">73</td><td class="num">2</td><td class="num">47.2</td><td class="num">0.45</td><td class="num">0.53</td><td class="num">37.7</td><td class="num">0.36</td><td class="num">0.38</td><td class="num down">-0.09</td><td class="num down">-0.15</td><td class="num">0.25</td></tr><tr><td class="id">1ZW8_A</td><td class="num">64</td><td class="num">2580</td><td class="num">66.9</td><td class="num">0.61</td><td class="num">0.58</td><td class="num">79.9</td><td class="num">0.67</td><td class="num">0.76</td><td class="num up">+0.06</td><td class="num up">+0.18</td><td class="num">0.60</td></tr><tr><td class="id">2MJM_A</td><td class="num">96</td><td class="num">34</td><td class="num">60.5</td><td class="num">0.58</td><td class="num">0.69</td><td class="num">71.0</td><td class="num">0.61</td><td class="num">0.72</td><td class="num up">+0.03</td><td class="num up">+0.03</td><td class="num">0.57</td></tr><tr><td class="id">8Q66_B</td><td class="num">246</td><td class="num">14</td><td class="num">59.4</td><td class="num">0.63</td><td class="num">0.72</td><td class="num">71.7</td><td class="num">0.69</td><td class="num">0.59</td><td class="num up">+0.05</td><td class="num down">-0.13</td><td class="num">0.64</td></tr><tr><td class="id">5A98_A</td><td class="num">248</td><td class="num">6</td><td class="num">67.3</td><td class="num">0.67</td><td class="num">0.73</td><td class="num">60.0</td><td class="num">0.61</td><td class="num">0.70</td><td class="num down">-0.06</td><td class="num down">-0.03</td><td class="num">0.65</td></tr><tr><td class="id">5MQC_A</td><td class="num">280</td><td class="num">34</td><td class="num">67.4</td><td class="num">0.62</td><td class="num">0.77</td><td class="num">42.8</td><td class="num">0.40</td><td class="num">0.43</td><td class="num down">-0.21</td><td class="num down">-0.34</td><td class="num">0.43</td></tr><tr><td class="id">8Z11_F</td><td class="num">206</td><td class="num">3002</td><td class="num">65.5</td><td class="num">0.66</td><td class="num">0.77</td><td class="num">66.9</td><td class="num">0.65</td><td class="num">0.75</td><td class="num flat">-0.01</td><td class="num down">-0.02</td><td class="num">0.53</td></tr><tr><td class="id">2MP4_A</td><td class="num">156</td><td class="num">1959</td><td class="num">69.5</td><td class="num">0.60</td><td class="num">0.78</td><td class="num">65.9</td><td class="num">0.59</td><td class="num">0.77</td><td class="num flat">-0.01</td><td class="num flat">-0.01</td><td class="num">0.60</td></tr><tr><td class="id">6Z5S_W</td><td class="num">102</td><td class="num">1</td><td class="num">57.4</td><td class="num">0.61</td><td class="num">0.79</td><td class="num">55.9</td><td class="num">0.51</td><td class="num">0.64</td><td class="num down">-0.09</td><td class="num down">-0.15</td><td class="num">0.34</td></tr><tr><td class="id">7JZJ_A</td><td class="num">284</td><td class="num">12</td><td class="num">64.8</td><td class="num">0.63</td><td class="num">0.79</td><td class="num">48.1</td><td class="num">0.50</td><td class="num">0.56</td><td class="num down">-0.13</td><td class="num down">-0.23</td><td class="num">0.46</td></tr><tr><td class="id">6CFW_F</td><td class="num">148</td><td class="num">2697</td><td class="num">62.4</td><td class="num">0.67</td><td class="num">0.81</td><td class="num">86.0</td><td class="num">0.75</td><td class="num">0.89</td><td class="num up">+0.08</td><td class="num up">+0.08</td><td class="num">0.78</td></tr><tr><td class="id">6RIM_A</td><td class="num">475</td><td class="num">16</td><td class="num">62.2</td><td class="num">0.58</td><td class="num">0.82</td><td class="num">51.1</td><td class="num">0.50</td><td class="num">0.74</td><td class="num down">-0.09</td><td class="num down">-0.08</td><td class="num">0.64</td></tr><tr><td class="id">2WBV_A</td><td class="num">188</td><td class="num">47</td><td class="num">67.4</td><td class="num">0.64</td><td class="num">0.83</td><td class="num">84.3</td><td class="num">0.86</td><td class="num">0.95</td><td class="num up">+0.22</td><td class="num up">+0.12</td><td class="num">0.84</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+<section class="caveats">
+  <h2>How to read this</h2>
+  <ul>
+    <li><strong>This run is MSA-only and template-free.</strong> Every one of
+      these structures is in the PDB today, so enabling templates would hand the
+      model its answer and destroy the blind-target property of the CASP15 set.</li>
+    <li><strong>The MSAs are ColabFold MMseqs2, not AlphaFold&rsquo;s own
+      jackhmmer/HHblits triple</strong> &mdash; no sequence databases are installed on
+      this machine. That, plus one model instead of five and no relaxation, is why
+      this run does not reproduce the published baseline exactly.</li>
+    <li><strong>&Delta; columns compare like with unlike on purpose.</strong> For the
+      CASP15 set the baseline is a different group&rsquo;s v2.2 run with its own
+      MSAs; a positive &Delta; means better MSAs or a newer parameter set helped,
+      not that the target stopped being hard.</li>
+    <li>Rows still below TM 0.8 after this run are the ones worth aiming
+      test-time training at &mdash; the failure survives a modern MSA.</li>
+  </ul>
+</section>
+</main>

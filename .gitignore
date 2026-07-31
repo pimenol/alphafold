@@ -6,3 +6,8 @@ scripts/bin/
 
 __pycache__/
 *.pyc
+
+# AlphaFold model parameters and the conda env live outside the repo, but the
+# predictions are large enough to keep out of git history too.
+predictions/
+logs/

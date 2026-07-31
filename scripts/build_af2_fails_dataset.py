@@ -305,12 +305,18 @@ def collect_msa_jobs(jobs: Mapping[str, str]) -> dict[str, str]:
 
 
 def read_msa_parts(target: str) -> dict[str, str]:
-  """Returns {filename: a3m_text} from a downloaded MMseqs2 result tarball."""
+  """Returns {filename: a3m_text} from a downloaded MMseqs2 result tarball.
+
+  The API terminates the last sequence of each part with a NUL byte.  It has to
+  go: parsers.parse_a3m passes it through happily, but it then reaches
+  pipeline.make_msa_features and raises KeyError('\\x00').
+  """
   parts = {}
   with tarfile.open(msa_cache_path(target)) as tf:
     for member in tf.getmembers():
       if member.name.endswith('.a3m'):
-        parts[os.path.basename(member.name)] = tf.extractfile(member).read().decode()
+        text = tf.extractfile(member).read().decode().replace('\x00', '')
+        parts[os.path.basename(member.name)] = text
   return parts
 
 
@@ -1175,6 +1181,12 @@ def stage_verify() -> None:
     names, seqs = parse_a3m(open(msa_path).read())
     check(seqs and seqs[0] == sequence,
           f'{target}: first a3m row is not the target sequence')
+    # Every residue must be something AlphaFold's feature builder accepts;
+    # parse_a3m itself is happy to pass through junk like the API's NUL bytes.
+    allowed = set('ABCDEFGHIJKLMNOPQRSTUVWXYZ-') | set('abcdefghijklmnopqrstuvwxyz')
+    stray = {c for s in seqs for c in s} - allowed
+    check(not stray, f'{target}: a3m has characters AlphaFold cannot encode: '
+                     f'{sorted(repr(c) for c in stray)}')
     check(int(row['msa_depth']) == len(seqs),
           f'{target}: msa_depth disagrees with the a3m')
     check(float(row['msa_neff']) >= MIN_NEFF,
