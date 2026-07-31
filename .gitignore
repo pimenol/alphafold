@@ -1,0 +1,8 @@
+# Downloads and intermediates for scripts/build_af2_fails_dataset.py.
+data/.cache/
+
+# USalign, compiled on demand by the dataset build.
+scripts/bin/
+
+__pycache__/
+*.pyc
