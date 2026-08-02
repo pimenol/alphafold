@@ -60,6 +60,23 @@ def ca_coords(pdb_path: str) -> np.ndarray:
   return np.array(coords)
 
 
+def superposed_rmsd(a: np.ndarray, b: np.ndarray) -> float:
+  """CA RMSD after optimal superposition (Kabsch).
+
+  AlphaFold's output frame is arbitrary, so a raw coordinate RMSD between two
+  predictions mixes a global rotation in with any real conformational change --
+  it can read tens of angstroms for structures that are essentially identical.
+  Superposing first makes the number mean "how much did the fold change".
+  """
+  a = a - a.mean(0)
+  b = b - b.mean(0)
+  v, _, w = np.linalg.svd(a.T @ b)
+  if np.linalg.det(v) * np.linalg.det(w) < 0:
+    v[:, -1] *= -1
+  rotated = a @ (v @ w)
+  return float(np.sqrt(np.mean(np.sum((rotated - b) ** 2, axis=-1))))
+
+
 def main() -> int:
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('--name', required=True,
@@ -288,11 +305,12 @@ def main() -> int:
       chosen = predict_and_write(best['params'], 'bestplddt')
 
     baseline_pdb = os.path.join(BASELINE_DIR, f'{target}.pdb')
-    moved = None
+    moved = moved_raw = None
     if os.path.exists(baseline_pdb):
       base_ca, new_ca = ca_coords(baseline_pdb), ca_coords(final['path'])
-      if base_ca.shape == new_ca.shape:
-        moved = float(np.sqrt(np.mean(np.sum((base_ca - new_ca) ** 2, -1))))
+      if base_ca.shape == new_ca.shape and base_ca.size:
+        moved_raw = float(np.sqrt(np.mean(np.sum((base_ca - new_ca) ** 2, -1))))
+        moved = superposed_rmsd(base_ca, new_ca)
 
     elapsed = time.time() - started
     results[target] = {
@@ -304,12 +322,14 @@ def main() -> int:
         'best_step': best['step'],
         'best_step_eval_plddt': chosen['plddt'],
         'ca_rmsd_vs_baseline': moved,
+        'ca_rmsd_vs_baseline_unaligned': moved_raw,
         'seconds': elapsed,
     }
     log(f'    eval pLDDT: baseline-step0 -> step{args.steps} = '
         f'{final["plddt"]:.2f}   best-pLDDT step {best["step"]} = '
         f'{chosen["plddt"]:.2f}')
-    rmsd_text = 'n/a' if moved is None else f'{moved:.3f} A'
+    rmsd_text = ('n/a' if moved is None else
+                 f'{moved:.3f} A superposed, {moved_raw:.3f} A raw')
     log(f'    CA RMSD vs M0 baseline: {rmsd_text}   ({elapsed:.0f}s)')
     log('')
     save(results)
