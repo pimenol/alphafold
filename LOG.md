@@ -87,7 +87,70 @@ caught three defects that would each have wasted a GPU allocation:
 that batch several configs per job rather than one job per config. A 20-minute wait on
 `qgpu_exp` (`open-35-8`) triggered the documented switch to `open-37-88 -p qgpu`.
 
+---
+
+## 2026-08-02 — M1 PASSED (on CPU), and lr 1e-4 is far too large
+
+**Run:** `cpudryrun` — violation loss, lr 1e-4, **1 step**, `9SLR_A` (73 res, depth 10),
+CPU. Intended only as an end-to-end plumbing check while the GPU queue was blocked; it
+answered M1 outright.
+
+### M1 verdict: passed
+
+| check | result |
+| --- | --- |
+| coordinates differ from baseline | yes — 3.613 Å CA RMSD superposed (14.419 Å raw) |
+| \|ΔlDDT\| ≥ 1 on at least one protein | yes — **7.48** |
+
+Gradients reach the structure module. Per the milestone definition, moving in the wrong
+direction passes M1: this proves the machinery works, not that the method works.
+
+### But the direction is wrong, and the optimiser is overshooting
+
+| metric | baseline | after 1 step | Δ |
+| --- | ---: | ---: | ---: |
+| lDDT | 44.99 | 37.52 | **−7.48** |
+| TM | 0.38 | 0.21 | −0.17 |
+| pLDDT (eval) | 47.22 | 41.08 | −6.14 |
+| violation loss | 0.01054 | 0.05638 | **+0.045** |
+| residues in violation | 0.233 | 0.329 | +0.096 |
+
+**The loss went up after a step that was supposed to minimise it.** That is overshoot, not
+a subtle failure. Adam normalises the update to roughly ±lr per parameter, so the global-
+norm clip of 0.1 does nothing to bound the step size here — with 93.2M parameters all
+moving 1e-4 coherently along the gradient, one step is a large perturbation of the trunk.
+A single step at lr 1e-4 costs 7.5 lDDT points; the acceptance threshold is 7.
+
+Decision: **shift the whole sweep down two decades to {1e-6, 1e-5}** and drop 1e-3, which
+can only be worse. Recorded rather than silently retuned, because it is the first real
+result about the method: full-parameter TTT on AF2 is far more lr-sensitive than the
+ProteinTTT/ESMFold setting the method ideas are borrowed from.
+
+### Second finding: the pLDDT selection signal does not track eval pLDDT
+
+The in-loop 0-recycle pLDDT *rose* over the step (39.22 → 39.90) while the 3-recycle eval
+pLDDT *fell* (47.22 → 41.08). Best-pLDDT step selection is therefore selecting on a
+quantity that disagrees in sign with the thing it is a proxy for. This is a direct
+consequence of the num_recycle=0 train / num_recycle=3 eval split. Watch it across the
+lr sweep; if it persists, either evaluate the selection signal with recycling (costly) or
+report step-10 only and say so.
+
+### Bug found and fixed: CA RMSD was measuring rotation, not conformational change
+
+The first version reported raw coordinate RMSD. AlphaFold's output frame is arbitrary, so
+that number mixes a global rotation in with any real change — it read 14.419 Å where the
+actual conformational change was 3.613 Å. Added Kabsch superposition; a rigid-motion
+control now gives 0.000 Å superposed against 67.5 Å raw. Both numbers are recorded.
+
+### Cost
+
+2510 s for 1 step + 1 eval forward on 73 residues on CPU. Fine as a one-off; everything
+else needs the GPU.
+
+`git diff --stat f3211e1 -- alphafold/ run_alphafold.py docker/`: still empty.
+
 ### Next
 
-M1 — does TTT move the structure at all. Violation loss and distogram entropy, lr sweep
-{1e-5, 1e-4, 1e-3}, 10 steps, on `subsets/lowconf5.txt`.
+M2 on `subsets/lowconf5.txt`, 10 steps: violation and entropy at lr {1e-6, 1e-5}, plus
+violation lr 1e-6 restricted to the last 8 Evoformer blocks (method idea 8 — worth
+pulling forward given how lr-sensitive the full-parameter update turned out to be).
