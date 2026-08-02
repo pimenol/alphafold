@@ -273,3 +273,74 @@ Three separate wrong conclusions came out of not having this control: a sign-inv
 ΔlDDT, a withdrawn "overshoot" claim, and a uniform-degradation result that was an
 artifact. A zero-step control costs one eval forward and would have caught all three. It
 is now the first thing run against any new configuration.
+
+---
+
+## 2026-08-02 — M2 on dev5: seven configs, no signal (NEGATIVE RESULT)
+
+**Runs:** `m2-{viol,entropy}-*` on `subsets/lowconf5.txt`, 10 steps each, scored against
+the **CPU** M0 baseline (device-matched — see the previous entry). 4 of 5 targets complete
+at the time of writing; the fifth (`1YDU_A`, deep MSA) is still running and cannot change
+the conclusion, since every effect is an order of magnitude below the threshold.
+
+### Δ lDDT in points, at step 10
+
+| config | mean | median | ≥ +7 | ≤ −7 | mean ΔpLDDT |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| violation lr 1e-5 | **+0.76** | +0.72 | 0 | 0 | −0.08 |
+| violation lr 1e-6, last 8 blocks | −0.05 | +0.01 | 0 | 0 | −0.04 |
+| violation lr 1e-6 | −0.13 | −0.00 | 0 | 0 | +0.21 |
+| entropy lr 1e-5 | −0.16 | −0.03 | 0 | 0 | +1.34 |
+| violation lr 3e-5 | −0.22 | +0.00 | 0 | 0 | +1.70 |
+| entropy lr 1e-6 | −0.38 | −0.19 | 0 | 0 | +0.12 |
+| violation lr 1e-4 | −0.56 | +0.00 | 0 | 0 | +0.27 |
+
+### M2 verdict: not met
+
+M2 needs mean ΔlDDT > 0 **and** at least one protein at ΔlDDT ≥ +7. Only violation at
+lr 1e-5 clears the first half. **Nothing reaches +7 on any protein** — the largest single
+gain anywhere is +2.74, the largest loss −3.39. Seven configurations spanning four
+learning rates over two decades and two losses all land within ±0.8 lDDT of zero.
+
+Nothing is catastrophic either: no regression past −7, and mean ΔpLDDT is near zero. The
+earlier "every config degrades by 4.8–10.6 points" picture was entirely the device
+artifact, now removed.
+
+### What the traces show
+
+Both losses optimise correctly — this is not an optimisation failure:
+
+- violation lr 1e-5: 0.06959 → **0.00004** over 10 steps, residues-in-violation 0.260 →
+  0.027. The physics term is essentially solved.
+- entropy lr 1e-5: 3.205 → 2.919.
+- lr 1e-6 on either loss is a near-no-op: `7DDQ_X` comes back **exactly ±0.00** on lDDT,
+  TM and pLDDT under most configs, so the low rates change nothing at all.
+
+**Driving the violation loss to zero moves true accuracy by less than one lDDT point.**
+That is the substantive finding: AlphaFold's structural violations on these targets are
+not what makes them wrong. The predictions are stereochemically fine and globally
+misfolded, so a physics-based self-consistency objective has almost no purchase on the
+error. Distogram sharpening likewise buys nothing.
+
+Deep-MSA target `2MP4_A` is mildly positive under most configs (+0.04 to +0.77), with
+entropy lr 1e-5 giving +4.67 pLDDT for +0.77 lDDT — the largest confidence gain in the
+sweep, and still far from useful accuracy.
+
+### Cost
+
+Seven configs × 5 targets on 128-core CPU nodes, ~10 h wall-clock, run in parallel. Zero
+GPU node-hours consumed; the `open-37-88` budget is untouched.
+
+`git diff --stat f3211e1 -- alphafold/ run_alphafold.py docker/`: still empty.
+
+### Next
+
+Per CLAUDE.md, stop tuning these two and work down the method list. Queued: **dropout
+consistency** (method idea 7) — two stochastic forward passes, minimise the symmetric KL
+between their distograms. MSA-free, so it applies to all 18, and it needs no upstream
+hook. A zero-step control runs alongside it, which is now standard for every new config.
+
+Recycling consistency (idea 6) is blocked on the same `hk.while_loop` limitation that
+forced `num_recycle=0`: comparing consecutive recycling iterations requires either a
+differentiable loop or an upstream hook to feed `prev` in explicitly. That would be the
+first justified change to `modules.py` if dropout consistency also comes back flat.

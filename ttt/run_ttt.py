@@ -153,9 +153,15 @@ def main() -> int:
   weights: dict[str, float] = {}
   for term in args.loss.split(','):
     name, _, weight = term.partition(':')
-    if name not in core.LOSSES:
-      raise SystemExit(f'unknown loss {name!r}; have {sorted(core.LOSSES)}')
+    if name not in core.LOSSES and name not in core.DUAL_LOSSES:
+      raise SystemExit(f'unknown loss {name!r}; have '
+                       f'{sorted(set(core.LOSSES) | set(core.DUAL_LOSSES))}')
     weights[name] = float(weight) if weight else 1.0
+  dual = [n for n in weights if n in core.DUAL_LOSSES]
+  if dual and len(weights) > 1:
+    raise SystemExit(f'{dual[0]} needs two stochastic forward passes and cannot '
+                     'currently be combined with a single-pass loss')
+  is_dual = bool(dual)
 
   log(f'# {args.name}')
   log(f'# {args.description}' if args.description else
@@ -187,9 +193,14 @@ def main() -> int:
   params = hk.data_structures.to_mutable_dict(params)
   eval_runner = model_lib.RunModel(eval_cfg, params)
 
+  # Dropout consistency needs the stochastic path: is_training=True with
+  # deterministic off, so the two passes actually differ.
+  if is_dual:
+    ttt_cfg.model.global_config.deterministic = False
+
   def ttt_forward(batch: Mapping[str, Any]) -> Mapping[str, Any]:
     model = modules.AlphaFold(ttt_cfg.model)
-    return model(batch, is_training=False, compute_loss=False,
+    return model(batch, is_training=is_dual, compute_loss=False,
                  ensemble_representations=False)
 
   ttt_apply = hk.transform(ttt_forward).apply
@@ -197,14 +208,23 @@ def main() -> int:
 
   def loss_fn(trainable, frozen, rng, batch):
     merged = {**frozen, **trainable}
-    out = ttt_apply(merged, rng, batch)
     batch0 = jax.tree.map(lambda x: x[0], batch)
     total = jnp.zeros(())
     aux = {}
-    for name, weight in weights.items():
-      value, extra = core.LOSSES[name](out, batch0, sm_cfg)
-      total = total + weight * value
+    if is_dual:
+      key_a, key_b = jax.random.split(rng)
+      out = ttt_apply(merged, key_a, batch)
+      out_b = ttt_apply(merged, key_b, batch)
+      name = dual[0]
+      value, extra = core.DUAL_LOSSES[name](out, out_b, batch0)
+      total = total + weights[name] * value
       aux.update(extra)
+    else:
+      out = ttt_apply(merged, rng, batch)
+      for name, weight in weights.items():
+        value, extra = core.LOSSES[name](out, batch0, sm_cfg)
+        total = total + weight * value
+        aux.update(extra)
     aux['plddt'] = core.plddt_from_output(out)
     return total, aux
 

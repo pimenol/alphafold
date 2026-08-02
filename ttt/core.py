@@ -136,10 +136,34 @@ def distogram_entropy_loss(out, batch, sm_config):
   return loss, {'distogram_entropy': loss}
 
 
+def distogram_disagreement(out_a, out_b, batch):
+  """Symmetric KL between two stochastic forward passes' distograms.
+
+  Method idea 7. Two passes with dropout active disagree where the model is
+  unsure; minimising that disagreement is a pure self-consistency objective with
+  no reference to the MSA, which matters because 11 of the 18 hard-set targets
+  are effectively single-sequence.
+
+  Costs one extra forward pass per step -- the only loss here that does.
+  """
+  log_p = jax.nn.log_softmax(out_a['distogram']['logits'], axis=-1)
+  log_q = jax.nn.log_softmax(out_b['distogram']['logits'], axis=-1)
+  p, q = jnp.exp(log_p), jnp.exp(log_q)
+  kl = jnp.sum(p * (log_p - log_q) + q * (log_q - log_p), axis=-1)  # (N, N)
+  seq_mask = batch['seq_mask']
+  pair_mask = seq_mask[:, None] * seq_mask[None, :]
+  loss = utils.mask_mean(mask=pair_mask, value=kl)
+  return loss, {'dropout_disagreement': loss}
+
+
 LOSSES = {
     'violation': violation_loss,
     'entropy': distogram_entropy_loss,
 }
+
+# Losses needing two stochastic forward passes rather than one. Handled
+# separately in the runner because they change the shape of the forward call.
+DUAL_LOSSES = {'dropout': distogram_disagreement}
 
 
 def plddt_from_output(out):
