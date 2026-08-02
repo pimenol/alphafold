@@ -115,16 +115,25 @@ direction passes M1: this proves the machinery works, not that the method works.
 | violation loss | 0.01054 | 0.05638 | **+0.045** |
 | residues in violation | 0.233 | 0.329 | +0.096 |
 
-**The loss went up after a step that was supposed to minimise it.** That is overshoot, not
-a subtle failure. Adam normalises the update to roughly ±lr per parameter, so the global-
-norm clip of 0.1 does nothing to bound the step size here — with 93.2M parameters all
-moving 1e-4 coherently along the gradient, one step is a large perturbation of the trunk.
-A single step at lr 1e-4 costs 7.5 lDDT points; the acceptance threshold is 7.
+**The loss went up after a step that was supposed to minimise it.** I read that as
+overshoot and shifted the sweep down two decades.
 
-Decision: **shift the whole sweep down two decades to {1e-6, 1e-5}** and drop 1e-3, which
-can only be worse. Recorded rather than silently retuned, because it is the first real
-result about the method: full-parameter TTT on AF2 is far more lr-sensitive than the
-ProteinTTT/ESMFold setting the method ideas are borrowed from.
+> **CORRECTION (same day, see the M2 entry).** The overshoot reading was wrong. A matched
+> control — identical config, only `lr` differing — shows the violation loss *falling* at
+> lr 1e-4: 0.06959 → 0.00743 → 0.00291, with pLDDT climbing faster than at any lower rate.
+> This run's step-0 loss of **0.01054 does not reproduce**; every later run of the same
+> target and parameters starts at **0.06959**, which is also what the independent
+> forward-only padding check measured. The step-0 value here is anomalous and I could not
+> attribute it to any config difference, so the loss-went-up comparison rested on a bad
+> baseline and is withdrawn.
+>
+> What survives is the accuracy measurement, which was taken against the native and does
+> not depend on that baseline: **one step at lr 1e-4 cost 7.48 lDDT points.** Combined
+> with the control, that is a sharper and more useful result than "overshoot" — the
+> violation loss goes *down* while lDDT goes *down with it*. The proxy and the target
+> disagree. That is the project's named failure mode, arriving at the first method.
+>
+> The sweep was still widened rather than narrowed: {1e-6, 1e-5, 3e-5, 1e-4} all ran.
 
 ### Second finding: the pLDDT selection signal does not track eval pLDDT
 
