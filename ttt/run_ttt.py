@@ -35,7 +35,12 @@ for path in (REPO, os.path.join(REPO, 'scripts')):
 CSV_PATH = os.path.join(REPO, 'af2_lowconf.csv')
 MSA_DIR = os.path.join(REPO, 'data', 'lowconf', 'msa')
 NATIVE_DIR = os.path.join(REPO, 'data', 'lowconf', 'pdbs')
-BASELINE_DIR = os.path.join(REPO, 'predictions', 'lowconf')
+# Device-matched: predictions/lowconf was produced on an A100, and AlphaFold does
+# not reproduce across devices (up to 14 lDDT points on this set), so a CPU run
+# must measure its drift against the CPU baseline or the number is meaningless.
+BASELINE_DIR = os.path.join(
+    REPO, 'predictions',
+    'lowconf_cpu' if os.environ.get('JAX_PLATFORMS') == 'cpu' else 'lowconf')
 LOG_DIR = os.path.join(REPO, 'logs')
 
 # Floor for the fitted MSA padding. Attention over a single row is degenerate in
