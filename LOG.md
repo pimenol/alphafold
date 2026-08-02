@@ -154,3 +154,53 @@ else needs the GPU.
 M2 on `subsets/lowconf5.txt`, 10 steps: violation and entropy at lr {1e-6, 1e-5}, plus
 violation lr 1e-6 restricted to the last 8 Evoformer blocks (method idea 8 — worth
 pulling forward given how lr-sensitive the full-parameter update turned out to be).
+
+---
+
+## 2026-08-02 — infrastructure: the campaign moved to CPU, and TTT got ~3× cheaper
+
+Not an experiment. Two changes that decide whether the campaign can run at all.
+
+### The GPU partitions are unusable, the CPU partitions are empty
+
+`qgpu` has 72 nodes: **16 in maintenance, 18 drained, 14 down**, 23 allocated, 1
+draining. Nothing free, 110 jobs pending, and the scheduler put a 12 h request ~24 h out.
+All five GPU partitions map to that same pool, so there is no partition trick.
+
+`qcpu` has **306 idle nodes at 128 cores each**, and a job starts in about ten seconds.
+The whole M2 sweep therefore runs on CPU: five configs as five parallel jobs, each on its
+own 128-core node, rather than queued behind each other for a GPU. GPU tickets stay
+queued as a bonus. CPU hours come from `open-35-15`, so the 50 GPU node-hours on
+`open-37-88` are untouched.
+
+### Fitting the MSA padding: same objective, ~3× less work
+
+The hard set is 11/18 effectively single-sequence, and the eval-sized feature dict pads
+regardless. For `9SLR_A` (10 real sequences): `msa` is padded to 508 rows and `extra_msa`
+to 5120 rows, of which **zero carry a real sequence**. The extra-MSA stack processes all
+5120 on every forward *and* backward pass.
+
+Those rows are masked, so dropping them should change nothing. Verified rather than
+assumed, forward-only, both MSA regimes:
+
+| target | depth | padding | violation | entropy | pLDDT | coords |
+| --- | ---: | --- | --- | --- | --- | --- |
+| 9SLR_A | 10 | 508/5120 → 14/8 | Δ 1.6e-7 | Δ 4.8e-7 | Δ 7.6e-6 | **0.0000 Å** |
+| 1YDU_A | 3275 | 508/5120 → 512/2771 | Δ 2.0e-8 | Δ 1.2e-7 | Δ **0** | **0.0000 Å** |
+
+2.7× faster on the shallow target including compile (205 s → 75 s); the steady-state gain
+is larger because compile dominates that figure. `--fit_msa_padding` applies this to the
+**TTT config only** — the eval forward stays byte-identical to M0, which is what keeps
+every Δ attributable to the parameters.
+
+### Three infrastructure bugs
+
+1. **`nohup` from a tool call does not survive.** The first padding check was launched in
+   the background from a shell that was then reaped; the process died with it and left an
+   empty log. Everything substantial now goes through Slurm.
+2. **The job script hard-coded `#SBATCH --gpus=1`**, so every CPU-partition submission
+   failed with "Requested node configuration is not available". Resources now come from
+   the command line.
+3. **Unquoted expansion word-split the run arguments.** `--description "M2 dev5: ..."`
+   reached argparse as a stray `dev5:` token and all five runs died after 8 s. `eval`
+   honours the inner quotes; checked before resubmitting.
