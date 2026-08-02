@@ -2,9 +2,12 @@
 #SBATCH --job-name=af2-ttt
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
-#SBATCH --gpus=1
 #SBATCH --output=logs/%x-%j.out
+#
+# Resources are NOT fixed here: pass --gpus=1 --cpus-per-task=16 for a GPU
+# partition, or --cpus-per-task=128 for a CPU one. A hard-coded --gpus=1 makes
+# every CPU-partition submission fail with "Requested node configuration is not
+# available".
 #
 # Runs one or more TTT experiments, one per line of TTT_RUNS. Queue waits on
 # this cluster dominate a short experiment, so batching several configs into a
@@ -47,8 +50,9 @@ while IFS= read -r run_args; do
   echo "############################################################"
   echo "### $(date '+%Y-%m-%d %H:%M:%S')  ${run_args}"
   echo "############################################################"
-  # shellcheck disable=SC2086
-  "${ENV_PREFIX}/bin/python" -m ttt.run_ttt --params_dir "${PARAMS_DIR}" ${run_args}
+  # eval, not plain expansion: --description takes a quoted string with spaces,
+  # and unquoted word-splitting would hand argparse "on dev5:" as a stray token.
+  eval "\"${ENV_PREFIX}/bin/python\" -m ttt.run_ttt --params_dir \"${PARAMS_DIR}\" ${run_args}"
   rc=$?
   if [ $rc -ne 0 ]; then
     echo "### RUN FAILED (exit ${rc}) -- continuing with the next one"
