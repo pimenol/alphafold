@@ -11,3 +11,8 @@ __pycache__/
 # predictions are large enough to keep out of git history too.
 predictions/
 logs/
+
+# Stereochemistry reference table for the structural violation terms. Upstream
+# expects it at this path but does not vendor it -- docker/Dockerfile downloads
+# it at image build time, and scripts/setup_af2_env.sh does the same here.
+alphafold/common/stereo_chemical_props.txt

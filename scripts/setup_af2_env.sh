@@ -60,6 +60,17 @@ print('jax', jax.__version__, '| haiku', haiku.__version__)
 print('numpy', numpy.__version__, '| tf', tensorflow.__version__, '| biopython', Bio.__version__)
 "
 
+echo "=== fetching stereo_chemical_props.txt ==="
+# Needed by residue_constants.make_atom14_dists_bounds, which the structural
+# violation terms call. Upstream does not vendor it; docker/Dockerfile downloads
+# it at image build time, so a non-Docker install has to do the same.
+STEREO="$(dirname "$0")/../alphafold/common/stereo_chemical_props.txt"
+if [[ ! -s "${STEREO}" ]]; then
+  curl -fL --retry 5 --retry-delay 5 -o "${STEREO}" \
+    "https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt"
+fi
+wc -l "${STEREO}"
+
 echo "=== downloading AlphaFold parameters into ${PARAMS_DIR} ==="
 # scripts/download_alphafold_params.sh needs aria2c, which is not installed
 # here, so fetch the same tarball with curl.

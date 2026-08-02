@@ -1,0 +1,18 @@
+# The fixed M1/M2 probe subset, drawn from subsets/lowconf18.txt (CLAUDE.md).
+#
+# Chosen to be cheap and to span MSA depth, so that both the MSA-free losses
+# (violation, distogram entropy, recycling/dropout consistency) and the
+# MSA-dependent ones (MLM, subsampling consistency) are testable on it.
+# 73-169 residues, one forward pass over all five = 471 s. Baseline mean lDDT
+# 0.462 -- headroom on every member.
+#
+# Every id here is in the hard 18. 2N7P_A was in an earlier version of this file
+# and is not: our fresh-MSA run took it to pLDDT 81.5, outside the target
+# regime. 2MP4_A replaces it as the second deep-MSA member.
+#
+# id       len  depth   Neff   base_plddt  base_lddt   regime
+2MP4_A   # 156   4935   1959       65.9      0.590   deep MSA
+1YDU_A   # 169   3275    313       64.0      0.476   deep MSA
+7DDQ_X   #  83    136     56       64.5      0.581   mid depth
+2CME_A   #  90     15      2       37.2      0.297   shallow
+9SLR_A   #  73     10      2       37.7      0.365   shallow

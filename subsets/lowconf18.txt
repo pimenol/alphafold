@@ -1,0 +1,44 @@
+# The hard set: the lowconf chains on which acceptance is judged (CLAUDE.md).
+#
+# Rule, applied to af2_run_results.csv (dataset == lowconf):
+#     run_plddt < 70  AND  run_lddt < 0.70
+# i.e. AlphaFold is still both unconfident and wrong when run with the MSAs TTT
+# actually uses. Both conditions select the same 18 chains.
+#
+# af2_lowconf.csv holds 25. The other 7 were selected on AlphaFold DB's published
+# pLDDT, but our own fresh-MSA M0 run made the model confident again, so they no
+# longer sit in the regime this project targets:
+#
+#     1ZW8_A  run pLDDT  79.9  run lDDT 0.667
+#     2MJM_A  run pLDDT  71.0  run lDDT 0.611
+#     2N7P_A  run pLDDT  81.5  run lDDT 0.479
+#     2WBV_A  run pLDDT  84.3  run lDDT 0.858
+#     5M86_A  run pLDDT  81.6  run lDDT 0.711
+#     6CFW_F  run pLDDT  86.0  run lDDT 0.751
+#     8Q66_B  run pLDDT  71.7  run lDDT 0.689
+#
+# They stay in the dataset and are still predicted and reported -- they just do
+# not gate acceptance.
+#
+# Summary of this file: n=18, mean pLDDT 49.6, mean lDDT 0.430, max lDDT 0.654,
+# lengths 73-475. 4 deep MSAs, 3 mid, 11 effectively single-sequence.
+#
+# id       len  depth   Neff   base_plddt  base_lddt   regime
+2GFP_A   # 375   6659   4630       63.9      0.337   deep
+8Z11_F   # 206   6062   3002       66.9      0.654   deep
+2MP4_A   # 156   4935   1959       65.9      0.590   deep
+1YDU_A   # 169   3275    313       64.0      0.476   deep
+7DDQ_X   #  83    136     56       64.5      0.581   mid
+6OEE_A   # 280    130     50       52.0      0.634   mid
+5MQC_A   # 280     53     34       42.8      0.402   mid
+7JZJ_A   # 284     28     12       48.1      0.504   shallow
+6RIM_A   # 475     27     16       51.1      0.499   shallow
+2CME_A   #  90     15      2       37.2      0.297   shallow
+6Z5S_W   # 102     11      1       55.9      0.515   shallow
+9SLR_A   #  73     10      2       37.7      0.365   shallow
+5A98_A   # 248      7      6       60.0      0.608   shallow
+8V1J_A   # 116      4      2       32.0      0.190   shallow
+7ZKD_A   #  88      4      4       41.6      0.302   shallow
+8FW5_H   # 117      4      1       41.7      0.334   shallow
+7AD5_A   # 122      3      3       42.7      0.273   shallow
+4ZKQ_A   # 412      2      1       25.5      0.182   shallow
