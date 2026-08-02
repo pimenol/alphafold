@@ -33,6 +33,15 @@ RESULTS_CSV = os.path.join(REPO, 'af2_run_results.csv')
 HARD_SET = os.path.join(REPO, 'subsets', 'lowconf18.txt')
 THRESHOLD = 7.0  # lDDT points
 
+# AlphaFold is not reproducible across devices. The same code, parameters, seed
+# and features give a prediction 9.39 A (superposed CA) apart on an A100 versus
+# on CPU for 9SLR_A -- verified by running the stock M0 script on both. On a set
+# selected for low confidence that is not numerical noise, it is a different
+# fold. So a TTT run must be scored against a baseline produced on the *same*
+# device, or the device difference swamps the effect being measured.
+CPU_BASELINE_DIR = os.path.join(REPO, 'predictions', 'lowconf_cpu')
+GPU_BASELINE_DIR = os.path.join(REPO, 'predictions', 'lowconf')
+
 
 def read_ids(path):
   return [l.split('#', 1)[0].strip() for l in open(path)
@@ -61,6 +70,10 @@ def main():
   parser.add_argument('--variant', default='both',
                       choices=['step', 'bestplddt', 'both'],
                       help='which TTT checkpoint to score')
+  parser.add_argument('--device', default='cpu', choices=['cpu', 'gpu'],
+                      help='device the TTT run used; picks the matching M0 '
+                           'baseline, because AlphaFold predictions are not '
+                           'reproducible across devices')
   args = parser.parse_args()
 
   out_dir = os.path.join(REPO, 'predictions', 'ttt', args.name)
@@ -70,22 +83,32 @@ def main():
   hard = set(read_ids(HARD_SET))
   binary = base.ensure_usalign()
 
+  baseline_dir = CPU_BASELINE_DIR if args.device == 'cpu' else GPU_BASELINE_DIR
   rows = []
+  skipped = []
   for target, info in summary['results'].items():
     native = os.path.join(NATIVE_DIR, f'{target}.pdb')
+    baseline_pdb = os.path.join(baseline_dir, f'{target}.pdb')
+    if not os.path.exists(baseline_pdb):
+      skipped.append(target)
+      continue
+    b_lddt, b_tm, b_plddt = score(baseline_pdb, native, binary)
     row = {
         'id': target,
         'hard': target in hard,
         'length': info['length'],
         'msa_depth': info['msa_depth'],
-        # M0 is the *run_* columns: our own AlphaFold run with these MSAs, which
-        # is what CLAUDE.md defines the baseline to be. The base_* columns are
-        # the shipped AlphaFold DB model, a different prediction entirely --
-        # scoring against those measures the wrong thing and inverted the sign
-        # of the first result.
-        'base_lddt': float(base_rows[target]['run_lddt']) * 100.0,
-        'base_tm': float(base_rows[target]['run_tm']),
-        'base_plddt': float(base_rows[target]['run_plddt']),
+        'baseline_device': args.device,
+        # Baseline is measured here, from the M0 prediction on the same device,
+        # rather than read from af2_run_results.csv -- those numbers are from
+        # the A100 run and do not transfer. The CSV's run_* values are kept
+        # alongside for reference; base_* there is the AlphaFold DB model, a
+        # different prediction entirely, and conflating the two inverted the
+        # sign of the first result I reported.
+        'base_lddt': b_lddt,
+        'base_tm': b_tm,
+        'base_plddt': b_plddt,
+        'gpu_m0_lddt': float(base_rows[target]['run_lddt']) * 100.0,
         'afdb_lddt': float(base_rows[target]['base_lddt']) * 100.0,
         'ca_rmsd': info['ca_rmsd_vs_baseline'],
         'best_step': info['best_step'],
@@ -103,8 +126,12 @@ def main():
         row[f'{tag}_dplddt'] = plddt - row['base_plddt']
     rows.append(row)
 
+  if skipped:
+    print(f'  ! no {args.device} M0 baseline for {len(skipped)} target(s), '
+          f'skipped: {" ".join(sorted(skipped))}')
   if not rows:
-    print(f'{args.name}: no targets in ttt_summary.json yet — nothing to score')
+    print(f'{args.name}: nothing scorable yet '
+          f'(no results, or no {args.device} baseline)')
     return 1
 
   rows.sort(key=lambda r: -r.get('step_dlddt', 0.0))

@@ -216,3 +216,60 @@ every Δ attributable to the parameters.
 3. **Unquoted expansion word-split the run arguments.** `--description "M2 dev5: ..."`
    reached argparse as a stray `dev5:` token and all five runs died after 8 s. `eval`
    honours the inner quotes; checked before resubmitting.
+
+---
+
+## 2026-08-02 — AlphaFold is not reproducible across devices: 9.4 Å, same code and seed
+
+This invalidated the first M2 reading and changes how every future Δ must be measured.
+
+### What happened
+
+The M2 sweep on `9SLR_A` showed all seven configs degrading lDDT by 4.8–10.6 points. The
+ordering was wrong, though: **lr 1e-6 moved the parameters ~100× less than lr 1e-4 and
+did nearly as much damage** (−8.10 vs −10.62), and distogram entropy at lr 1e-6, which
+shifted its own loss by 0.7 %, still produced 9 Å of structural change. Damage that barely
+depends on step size is not a property of the method.
+
+### The control
+
+Ran the TTT runner with `--steps 0`: unchanged parameters, so its eval forward must
+reproduce the M0 prediction exactly.
+
+| comparison | superposed CA RMSD |
+| --- | ---: |
+| my zero-step TTT eval vs **stock `run_af2_on_dataset.py` on CPU** | **0.0000 Å** |
+| stock `run_af2_on_dataset.py` on CPU vs **stored A100 M0** | **9.3935 Å** |
+| my zero-step TTT eval vs stored A100 M0 | 9.3935 Å |
+
+The TTT eval path is byte-perfect. The 9.4 Å is **AlphaFold itself**, run through the
+unmodified M0 script with identical parameters, features, seed and config — only the
+device differs. Not numerical noise on a set selected for low confidence: a different
+fold. Measured accuracy on `9SLR_A` differs accordingly — A100 M0 lDDT **36.50**, CPU M0
+lDDT **29.00**, a 7.5-point gap from hardware alone, which is larger than the +7 the
+project must demonstrate.
+
+Running the zero-step control with fitted and with full MSA padding gave *identical*
+predictions (17.43369 Å raw, both), independently reconfirming that the padding fit is a
+no-op and isolating the difference to the device.
+
+### Consequences
+
+1. **The first M2 table is void.** Those Δs were CPU predictions scored against an A100
+   baseline, so they measured the device gap, not TTT. Not reported as a result.
+2. **Every Δ must be device-matched.** `ttt/evaluate.py` now measures the baseline itself
+   from an M0 prediction made on the same device (`--device cpu|gpu`) rather than reading
+   the A100 numbers out of `af2_run_results.csv`. Verified: the zero-step control now
+   scores exactly +0.00 lDDT, +0.00 TM, +0.00 pLDDT.
+3. **A CPU M0 baseline is being built** for all 18 hard-set targets
+   (`predictions/lowconf_cpu/`), since the campaign runs on CPU while the GPU partitions
+   are down.
+4. The A100 M0 in `af2_run_results.csv` stays the reference for the *dataset* and for the
+   hard-set definition; it is kept as a `gpu_m0_lddt` column so the two are never mixed.
+
+### Why this was worth the compute
+
+Three separate wrong conclusions came out of not having this control: a sign-inverted
+ΔlDDT, a withdrawn "overshoot" claim, and a uniform-degradation result that was an
+artifact. A zero-step control costs one eval forward and would have caught all three. It
+is now the first thing run against any new configuration.
