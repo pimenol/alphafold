@@ -89,7 +89,7 @@ that batch several configs per job rather than one job per config. A 20-minute w
 
 ---
 
-## 2026-08-02 — M1 PASSED (on CPU), and lr 1e-4 is far too large
+## 2026-08-02 — M1 PASSED (on CPU)
 
 **Run:** `cpudryrun` — violation loss, lr 1e-4, **1 step**, `9SLR_A` (73 res, depth 10),
 CPU. Intended only as an end-to-end plumbing check while the GPU queue was blocked; it
@@ -100,49 +100,55 @@ answered M1 outright.
 | check | result |
 | --- | --- |
 | coordinates differ from baseline | yes — 3.613 Å CA RMSD superposed (14.419 Å raw) |
-| \|ΔlDDT\| ≥ 1 on at least one protein | yes — **7.48** |
+| \|ΔlDDT\| ≥ 1 on at least one protein | yes — **+1.02** |
 
-Gradients reach the structure module. Per the milestone definition, moving in the wrong
-direction passes M1: this proves the machinery works, not that the method works.
+Gradients reach the structure module.
 
-### But the direction is wrong, and the optimiser is overshooting
+### Result, against the M0 baseline
 
-| metric | baseline | after 1 step | Δ |
+| metric | M0 | after 1 step | Δ |
 | --- | ---: | ---: | ---: |
-| lDDT | 44.99 | 37.52 | **−7.48** |
-| TM | 0.38 | 0.21 | −0.17 |
-| pLDDT (eval) | 47.22 | 41.08 | −6.14 |
-| violation loss | 0.01054 | 0.05638 | **+0.045** |
-| residues in violation | 0.233 | 0.329 | +0.096 |
+| lDDT | 36.50 | 37.52 | **+1.02** |
+| TM | 0.38 | 0.36 | −0.02 |
+| pLDDT | 37.74 | 41.08 | +3.34 |
+| violation loss | 0.06959 | — | falls monotonically (see M2) |
 
-**The loss went up after a step that was supposed to minimise it.** I read that as
-overshoot and shifted the sweep down two decades.
+One step at lr 1e-4 moves the structure 3.6 Å and gains a point of lDDT. Not evidence the
+method works — one step, one protein, and TM went slightly the wrong way — but the
+direction is not hostile.
 
-> **CORRECTION (same day, see the M2 entry).** The overshoot reading was wrong. A matched
-> control — identical config, only `lr` differing — shows the violation loss *falling* at
-> lr 1e-4: 0.06959 → 0.00743 → 0.00291, with pLDDT climbing faster than at any lower rate.
-> This run's step-0 loss of **0.01054 does not reproduce**; every later run of the same
-> target and parameters starts at **0.06959**, which is also what the independent
-> forward-only padding check measured. The step-0 value here is anomalous and I could not
-> attribute it to any config difference, so the loss-went-up comparison rested on a bad
-> baseline and is withdrawn.
->
-> What survives is the accuracy measurement, which was taken against the native and does
-> not depend on that baseline: **one step at lr 1e-4 cost 7.48 lDDT points.** Combined
-> with the control, that is a sharper and more useful result than "overshoot" — the
-> violation loss goes *down* while lDDT goes *down with it*. The proxy and the target
-> disagree. That is the project's named failure mode, arriving at the first method.
->
-> The sweep was still widened rather than narrowed: {1e-6, 1e-5, 3e-5, 1e-4} all ran.
+### Two errors I made reading this run, both now fixed
 
-### Second finding: the pLDDT selection signal does not track eval pLDDT
+**1. Scored against the wrong baseline.** `af2_run_results.csv` carries two sets of
+columns: `base_*` is the shipped AlphaFold DB model, `run_*` is our own M0 AlphaFold run
+with these MSAs. CLAUDE.md defines the baseline as M0, i.e. `run_*`. `ttt/evaluate.py`
+read `base_*`. For `9SLR_A` those differ a lot — AFDB lDDT 45.0 versus M0 36.5 — so the
+first reading came out as **ΔlDDT −7.48** when the correct figure is **+1.02**. The sign
+was inverted. Fixed in `ttt/evaluate.py`; the AFDB number is kept as a separate
+`afdb_lddt` column so the two can never be confused again.
 
-The in-loop 0-recycle pLDDT *rose* over the step (39.22 → 39.90) while the 3-recycle eval
-pLDDT *fell* (47.22 → 41.08). Best-pLDDT step selection is therefore selecting on a
-quantity that disagrees in sign with the thing it is a proxy for. This is a direct
-consequence of the num_recycle=0 train / num_recycle=3 eval split. Watch it across the
-lr sweep; if it persists, either evaluate the selection signal with recycling (costly) or
-report step-10 only and say so.
+**2. Claimed lr 1e-4 "overshoots".** That rested on this run's step-0 violation loss of
+0.01054 rising to 0.05638. The 0.01054 **does not reproduce**: every later run of the same
+target with the same parameters starts at **0.06959**, as does an independent forward-only
+check. A matched control (identical config, only `lr` differing) shows the loss *falling*
+at lr 1e-4 — 0.06959 → 0.00743 → 0.00291 — with pLDDT climbing faster than at any lower
+rate. The overshoot claim is withdrawn. I could not attribute the anomalous step-0 value
+to any config difference; it came from a throwaway run and is not worth further GPU time,
+but it is recorded here rather than quietly dropped.
+
+The correction that mattered: I had written that "the violation loss goes down while lDDT
+goes down with it — proxy and target disagree". With the baseline fixed, that is false.
+At lr 1e-4 on this target the loss goes down, pLDDT goes up, **and lDDT goes up**. No
+divergence was observed. The sweep was widened to {1e-6, 1e-5, 3e-5, 1e-4} rather than
+narrowed.
+
+### Second finding: the pLDDT selection signal may not track eval pLDDT
+
+The in-loop 0-recycle pLDDT rose 39.22 → 39.90 while eval pLDDT rose 37.74 → 41.08 — same
+direction here, but the in-loop signal moved by 0.7 where eval moved by 3.3. Worth
+watching across the sweep: best-pLDDT step selection is only meaningful if the proxy
+ranks steps the way the eval forward would. This is a consequence of the num_recycle=0
+train / num_recycle=3 eval split.
 
 ### Bug found and fixed: CA RMSD was measuring rotation, not conformational change
 
@@ -150,21 +156,18 @@ The first version reported raw coordinate RMSD. AlphaFold's output frame is arbi
 that number mixes a global rotation in with any real change — it read 14.419 Å where the
 actual conformational change was 3.613 Å. Added Kabsch superposition; a rigid-motion
 control now gives 0.000 Å superposed against 67.5 Å raw. Both numbers are recorded.
+(`cpudryrun` predates the fix, so its stored summary carries only the raw figure.)
 
 ### Cost
 
-2510 s for 1 step + 1 eval forward on 73 residues on CPU. Fine as a one-off; everything
-else needs the GPU.
+2510 s for 1 step + 1 eval forward on 73 residues on CPU.
 
 `git diff --stat f3211e1 -- alphafold/ run_alphafold.py docker/`: still empty.
 
 ### Next
 
-M2 on `subsets/lowconf5.txt`, 10 steps: violation and entropy at lr {1e-6, 1e-5}, plus
-violation lr 1e-6 restricted to the last 8 Evoformer blocks (method idea 8 — worth
-pulling forward given how lr-sensitive the full-parameter update turned out to be).
-
----
+M2 on `subsets/lowconf5.txt`, 10 steps: violation at lr {1e-6, 1e-5, 3e-5, 1e-4}, entropy
+at {1e-6, 1e-5}, plus violation lr 1e-6 restricted to the last 8 Evoformer blocks.
 
 ## 2026-08-02 — infrastructure: the campaign moved to CPU, and TTT got ~3× cheaper
 

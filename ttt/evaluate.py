@@ -78,9 +78,15 @@ def main():
         'hard': target in hard,
         'length': info['length'],
         'msa_depth': info['msa_depth'],
-        'base_lddt': float(base_rows[target]['base_lddt']) * 100.0,
-        'base_tm': float(base_rows[target]['base_tm']),
-        'base_plddt': float(base_rows[target]['base_plddt']),
+        # M0 is the *run_* columns: our own AlphaFold run with these MSAs, which
+        # is what CLAUDE.md defines the baseline to be. The base_* columns are
+        # the shipped AlphaFold DB model, a different prediction entirely --
+        # scoring against those measures the wrong thing and inverted the sign
+        # of the first result.
+        'base_lddt': float(base_rows[target]['run_lddt']) * 100.0,
+        'base_tm': float(base_rows[target]['run_tm']),
+        'base_plddt': float(base_rows[target]['run_plddt']),
+        'afdb_lddt': float(base_rows[target]['base_lddt']) * 100.0,
         'ca_rmsd': info['ca_rmsd_vs_baseline'],
         'best_step': info['best_step'],
     }
