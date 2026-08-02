@@ -38,6 +38,10 @@ NATIVE_DIR = os.path.join(REPO, 'data', 'lowconf', 'pdbs')
 BASELINE_DIR = os.path.join(REPO, 'predictions', 'lowconf')
 LOG_DIR = os.path.join(REPO, 'logs')
 
+# Floor for the fitted MSA padding. Attention over a single row is degenerate in
+# places, so never shrink below this even for a one-sequence alignment.
+MIN_MSA_ROWS = 8
+
 
 def read_subset(path: str) -> list[str]:
   """Reads ids from a subset file, ignoring comments and inline annotations."""
@@ -100,6 +104,12 @@ def main() -> int:
   parser.add_argument('--params_dir',
                       default='/scratch/project/open-37-88/pimenol/af2ttt/af2params')
   parser.add_argument('--out_dir', default=None)
+  parser.add_argument('--fit_msa_padding', action='store_true',
+                      help='shrink the TTT-only MSA padding to the number of '
+                           'sequences the target actually has. Most of the hard '
+                           'set is effectively single-sequence, so the default '
+                           '508 cluster / 5120 extra rows are almost all mask. '
+                           'Does not touch the eval config.')
   parser.add_argument('--time_budget', type=float, default=None,
                       help='minutes; stop starting new targets past this, so a '
                            'short allocation ends cleanly instead of being '
@@ -234,6 +244,21 @@ def main() -> int:
     eval_feat = model_features.np_example_to_features(
         np_example=dict(features), config=eval_cfg,
         random_seed=args.random_seed)
+
+    if args.fit_msa_padding:
+      # The padded rows are masked out, so dropping them leaves the objective
+      # unchanged while removing most of the work. Only the TTT config is
+      # touched; eval stays byte-identical to M0.
+      clusters = min(eval_cfg.data.eval.max_msa_clusters,
+                     max(MIN_MSA_ROWS, used + eval_cfg.data.eval.max_templates))
+      extra = min(eval_cfg.data.common.max_extra_msa,
+                  max(MIN_MSA_ROWS, used - clusters + MIN_MSA_ROWS))
+      ttt_cfg.data.eval.max_msa_clusters = clusters
+      ttt_cfg.data.common.max_extra_msa = extra
+      log(f'    msa padding fitted: clusters {clusters} '
+          f'(from {eval_cfg.data.eval.max_msa_clusters}), extra {extra} '
+          f'(from {eval_cfg.data.common.max_extra_msa})')
+
     ttt_feat = model_features.np_example_to_features(
         np_example=dict(features), config=ttt_cfg,
         random_seed=args.random_seed)

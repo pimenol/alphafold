@@ -25,12 +25,20 @@ PARAMS_DIR=/scratch/project/open-37-88/pimenol/af2ttt/af2params
 
 cd "${REPO}"
 
-export XLA_PYTHON_CLIENT_PREALLOCATE=false
-export TF_FORCE_UNIFIED_MEMORY=1
-export XLA_PYTHON_CLIENT_MEM_FRACTION=4.0
 export TF_CPP_MIN_LOG_LEVEL=2
 
-nvidia-smi --query-gpu=name,memory.total --format=csv
+# The GPU partitions on this cluster are mostly down or in maintenance while the
+# CPU partitions sit idle, so the same script has to run either way.
+if nvidia-smi --query-gpu=name,memory.total --format=csv 2>/dev/null; then
+  export XLA_PYTHON_CLIENT_PREALLOCATE=false
+  export TF_FORCE_UNIFIED_MEMORY=1
+  export XLA_PYTHON_CLIENT_MEM_FRACTION=4.0
+else
+  echo "no GPU visible -- running on CPU with ${SLURM_CPUS_PER_TASK:-1} cores"
+  export JAX_PLATFORMS=cpu
+  export XLA_FLAGS="--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=${SLURM_CPUS_PER_TASK:-1}"
+  export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-1}"
+fi
 
 rc_all=0
 while IFS= read -r run_args; do
