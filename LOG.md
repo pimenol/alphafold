@@ -344,3 +344,53 @@ Recycling consistency (idea 6) is blocked on the same `hk.while_loop` limitation
 forced `num_recycle=0`: comparing consecutive recycling iterations requires either a
 differentiable loop or an upstream hook to feed `prev` in explicitly. That would be the
 first justified change to `modules.py` if dropout consistency also comes back flat.
+
+---
+
+## 2026-08-03 — GPU only from here; and the measurement noise floor
+
+User instruction: **do not use CPU, only GPU.** All CPU jobs cancelled. The five dropout
+runs were at 3–4 of 5 targets when stopped; their completed targets are scored and stand
+as recorded below, but they will not be extended.
+
+### The GPU zero-step control does not reproduce the stored M0 either
+
+Ran the mandatory zero-step control on GPU against `predictions/lowconf/` (the A100 M0):
+
+| target | ΔlDDT | ΔpLDDT | CA RMSD superposed |
+| --- | ---: | ---: | ---: |
+| 7DDQ_X | −0.01 | +0.00 | 0.049 Å |
+| 9SLR_A | **−0.59** | +0.22 | 0.662 Å |
+
+Same code, same parameters, same seed, same GPU model — but **a different node**: M0 ran
+on `acn06` (job 4607942), this control on `acn65`. So AlphaFold is not bit-reproducible
+even across two A100s.
+
+This is far milder than the CPU-vs-GPU gap (9.39 Å / 7.5 lDDT points on `9SLR_A`) but it
+is not zero, and it sets the **noise floor of every measurement in this project**:
+
+- on a stable target like `7DDQ_X`, run-to-run variation is ~0.01 lDDT — negligible;
+- on a sensitive target like `9SLR_A`, it is **~0.6 lDDT points**.
+
+### Consequence for what has already been measured
+
+Every M2 effect landed within ±0.8 lDDT of zero. With a per-target noise floor of up to
+0.6, **most of the M2 sweep is indistinguishable from run-to-run noise.** That does not
+change the M2 verdict — the bar is +7 and nothing came within 3× of it — but it does mean
+the ranking inside that table (violation 1e-5 "best" at +0.76, entropy "worst" at −0.56)
+should not be read as a real ordering. It is noise.
+
+It also means the dropout-consistency result (+1.23 mean, +1.86 on shallow-MSA targets)
+is **only about 2× the noise floor** and cannot be called a real effect without
+replication on a second seed. It is a lead, not a finding.
+
+A `gpu-noisefloor` run — zero TTT steps across all of dev5 — is queued to measure the
+per-target floor properly, so future Δs can be reported against it rather than against an
+assumption.
+
+### Cluster state
+
+`qgpu` has 2069 jobs pending; 18 nodes drained, 14 down, 24 allocated, and 13 now
+"planned" as maintenance ends. The express queue (`qgpu_exp`, `open-35-8`) turns around in
+~15 minutes and is being used for controls; the main sweep sits on `qgpu` behind ~1980
+jobs.
